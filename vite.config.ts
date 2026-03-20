@@ -12,7 +12,6 @@ export default defineConfig({
   },
   server: {
     fs: {
-      // Allow serving files from node_modules (for Monaco local files)
       allow: [".."],
     },
   },
