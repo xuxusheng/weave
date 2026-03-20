@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monaco-variable-editor
+  labels:
+    app: monaco-variable-editor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monaco-variable-editor
+  template:
+    metadata:
+      labels:
+        app: monaco-variable-editor
+    spec:
+      containers:
+        - name: monaco-variable-editor
+          image: <REGISTRY>/monaco-variable-editor:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monaco-variable-editor
+spec:
+  selector:
+    app: monaco-variable-editor
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monaco-variable-editor
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: monaco-variable-editor.<DOMAIN>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: monaco-variable-editor
+                port:
+                  number: 80
