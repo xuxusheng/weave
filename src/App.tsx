@@ -1,9 +1,11 @@
 import { useState } from "react"
 import { MonacoVariableEditor } from "@/components/monaco-variable-editor"
 import { parseVariables, getAllVariables, defaultVariableGroups } from "@/types/variables"
+import WorkflowEditorPage from "@/pages/WorkflowEditorPage"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 const DOUBLE_BRACE = "{{"
 
@@ -19,135 +21,151 @@ const INITIAL_VALUE = [
   "",
 ].join("\n")
 
+type Tab = "monaco" | "workflow"
+
 export default function App() {
+  const [tab, setTab] = useState<Tab>("workflow")
   const [value, setValue] = useState(INITIAL_VALUE)
   const allVariables = getAllVariables(defaultVariableGroups)
   const parsed = parseVariables(value)
 
+  if (tab === "workflow") {
+    return (
+      <div className="h-screen flex flex-col">
+        {/* Tab bar */}
+        <div className="h-10 bg-muted/50 border-b border-border flex items-center px-4 gap-1 shrink-0">
+          <button
+            onClick={() => setTab("monaco")}
+            className={cn(
+              "px-3 py-1 rounded-md text-xs font-medium transition-colors",
+              tab === "monaco"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            📝 变量编辑器
+          </button>
+          <button
+            onClick={() => setTab("workflow")}
+            className={cn(
+              "px-3 py-1 rounded-md text-xs font-medium transition-colors",
+              tab === "workflow"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            🔧 工作流编排
+          </button>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <WorkflowEditorPage />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Monaco 变量编辑器
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            React 19 + Vite 8 + Tailwind CSS v4 + shadcn/ui · 输入{" "}
-            <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
-              {DOUBLE_BRACE}
-            </code>{" "}
-            触发变量补全
+    <div className="h-screen flex flex-col">
+      {/* Tab bar */}
+      <div className="h-10 bg-muted/50 border-b border-border flex items-center px-4 gap-1 shrink-0">
+        <button
+          onClick={() => setTab("monaco")}
+          className={cn(
+            "px-3 py-1 rounded-md text-xs font-medium transition-colors",
+            tab === "monaco"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          📝 变量编辑器
+        </button>
+        <button
+          onClick={() => setTab("workflow")}
+          className={cn(
+            "px-3 py-1 rounded-md text-xs font-medium transition-colors",
+            tab === "workflow"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          🔧 工作流编排
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold tracking-tight">
+              Monaco 变量编辑器
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              React 19 + Vite 8 + Tailwind CSS v4 + shadcn/ui · 输入{" "}
+              <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+                {DOUBLE_BRACE}
+              </code>{" "}
+              触发变量补全
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+            {/* Editor */}
+            <div>
+              <MonacoVariableEditor
+                value={value}
+                onChange={setValue}
+                height="480px"
+              />
+            </div>
+
+            {/* Sidebar */}
+            <div className="flex flex-col gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    🔍 解析到的变量
+                    <Badge variant="secondary" className="text-xs">
+                      {parsed.length}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-1.5">
+                    {parsed.map((v, i) => {
+                      const item = allVariables.find((a) => a.value === v.variable)
+                      return (
+                        <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 text-sm">
+                          <span className="text-base">{item?.icon ?? "❓"}</span>
+                          <span className="font-medium text-primary">{item?.label ?? v.variable}</span>
+                          <code className="text-xs text-muted-foreground ml-auto font-mono">{v.variable}</code>
+                        </div>
+                      )
+                    })}
+                    {parsed.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">还没有引用变量</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">📄 实际值</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <pre className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md overflow-auto max-h-40 whitespace-pre-wrap break-all font-mono">
+                    {value}
+                  </pre>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <Separator className="my-8" />
+          <p className="text-xs text-muted-foreground text-center">
+            Vite 8 · React 19 · TypeScript 5.9 · Tailwind CSS v4 · shadcn/ui · Monaco Editor
           </p>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-          {/* Editor */}
-          <div>
-            <MonacoVariableEditor
-              value={value}
-              onChange={setValue}
-              height="480px"
-            />
-          </div>
-
-          {/* Sidebar */}
-          <div className="flex flex-col gap-4">
-            {/* Variables */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  🔍 解析到的变量
-                  <Badge variant="secondary" className="text-xs">
-                    {parsed.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-1.5">
-                  {parsed.map((v, i) => {
-                    const item = allVariables.find((a) => a.value === v.variable)
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 text-sm"
-                      >
-                        <span className="text-base">{item?.icon ?? "❓"}</span>
-                        <span className="font-medium text-primary">
-                          {item?.label ?? v.variable}
-                        </span>
-                        <code className="text-xs text-muted-foreground ml-auto font-mono">
-                          {v.variable}
-                        </code>
-                      </div>
-                    )
-                  })}
-                  {parsed.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      还没有引用变量
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Raw value */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">
-                  📄 实际值（后端收到的）
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md overflow-auto max-h-40 whitespace-pre-wrap break-all font-mono">
-                  {value}
-                </pre>
-              </CardContent>
-            </Card>
-
-            {/* Usage */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">
-                  💡 使用说明
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">·</span>
-                    输入{" "}
-                    <code className="bg-muted px-1 rounded text-xs font-mono">
-                      {DOUBLE_BRACE}
-                    </code>{" "}
-                    自动弹出补全
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">·</span>
-                    <code className="bg-muted px-1 rounded text-xs font-mono">
-                      Ctrl+Space
-                    </code>{" "}
-                    手动触发
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">·</span>
-                    下拉中输入文字搜索过滤
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">·</span>
-                    悬停标签查看变量详情
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        <Separator className="my-8" />
-
-        <p className="text-xs text-muted-foreground text-center">
-          Vite 8 · React 19 · TypeScript 5.9 · Tailwind CSS v4 · shadcn/ui · Monaco Editor
-        </p>
       </div>
     </div>
   )
