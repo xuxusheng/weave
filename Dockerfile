@@ -40,8 +40,20 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
+    # index.html 不缓存，确保每次拿到最新版本
+    location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+        add_header Expires "0";
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
+    }
+    # 根目录静态资源（图标等）
+    location ~* .(svg|ico|png|jpg|webp)$ {
+        expires 7d;
+        add_header Cache-Control "public";
     }
     location /assets/ {
         expires 1y;
