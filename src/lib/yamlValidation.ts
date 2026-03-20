@@ -208,3 +208,54 @@ export function setupYamlValidation(
 
   return disposable
 }
+
+// Validate task config and return status for node display
+export function validateTaskConfig(
+  taskConfig: string,
+  inputs: KestraInput[],
+): { status: "ok" | "warning" | "error"; messages: string[] } {
+  const messages: string[] = []
+  let worstStatus: "ok" | "warning" | "error" = "ok"
+
+  const lines = taskConfig.split("\n")
+
+  for (const line of lines) {
+    // Input references
+    for (const match of line.matchAll(/\{\{\s*inputs\.(\w+)\s*\}\}/g)) {
+      const inputId = match[1]
+      if (!inputs.some((inp) => inp.id === inputId)) {
+        messages.push(`未定义的输入参数: ${inputId}`)
+        worstStatus = "error"
+      }
+    }
+
+    // Task type
+    if (line.trim().startsWith("type:")) {
+      const val = line.replace(/^.*type:\s*"?/, "").replace(/"?\s*$/, "").trim()
+      if (val && !KNOWN_PLUGIN_TYPES.includes(val)) {
+        messages.push(`未知插件类型: ${val}`)
+        if (worstStatus === "ok") worstStatus = "warning"
+      }
+    }
+
+    // ID format
+    if (line.trim().startsWith("id:")) {
+      const val = line.replace(/^.*id:\s*"?/, "").replace(/"?\s*$/, "").trim()
+      if (!val) {
+        messages.push("任务 ID 不能为空")
+        worstStatus = "error"
+      } else if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(val)) {
+        messages.push(`ID 格式建议: ${val}`)
+        if (worstStatus === "ok") worstStatus = "warning"
+      }
+    }
+
+    // Empty type
+    if (line.trim() === "type:" || line.trim() === 'type: ""') {
+      messages.push("任务类型不能为空")
+      worstStatus = "error"
+    }
+  }
+
+  return { status: worstStatus, messages }
+}

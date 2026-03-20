@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { MonacoVariableEditor } from "@/components/monaco-variable-editor"
 import { parseVariables, getAllVariables, defaultVariableGroups } from "@/types/variables"
+import { ReactFlowProvider } from "@xyflow/react"
 import WorkflowEditorPage from "@/pages/WorkflowEditorPage"
 import { cn } from "@/lib/utils"
 
@@ -30,7 +31,9 @@ export default function App() {
           {tabBtn("workflow", "🔧 工作流")}
         </div>
         <div className="flex-1 overflow-hidden">
-          <WorkflowEditorPage />
+          <ReactFlowProvider>
+            <WorkflowEditorPage />
+          </ReactFlowProvider>
         </div>
       </div>
     )

@@ -19,6 +19,9 @@ import { InputConfigPanel } from "@/components/flow/InputConfigPanel"
 import { KestraYamlPanel } from "@/components/flow/KestraYamlPanel"
 import { DEFAULT_TASK_YAML } from "@/types/kestra"
 import type { KestraInput } from "@/types/kestra"
+import type { TaskNodeData } from "@/components/flow/TaskNode"
+import { validateTaskConfig } from "@/lib/yamlValidation"
+import { getLayoutedElements } from "@/lib/autoLayout"
 
 // Auto-fit the view on mount and window resize
 function FitViewOnMount() {
@@ -94,12 +97,13 @@ const INITIAL_INPUTS: KestraInput[] = [
   { id: "apiKey", type: "STRING", description: "API 密钥", required: true },
 ]
 
-function getTaskData(node: Node) {
-  return node.data as unknown as { label: string; taskConfig: string }
+function getTaskData(node: Node): TaskNodeData {
+  return node.data as unknown as TaskNodeData
 }
 
 export default function WorkflowEditorPage() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
+  const { fitView } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([
     { id: "e1-2", source: "task_1", target: "task_2", animated: true, style: { stroke: "#818cf8" } },
@@ -217,6 +221,48 @@ export default function WorkflowEditorPage() {
     setRightPanel("none")
   }, [selectedNodeId, setNodes, setEdges, pushHistory])
 
+  // Validate all nodes and update their status
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        const data = getTaskData(n)
+        const result = validateTaskConfig(data.taskConfig, inputs)
+        return {
+          ...n,
+          data: {
+            ...data,
+            validationStatus: result.status,
+            validationMessages: result.messages,
+          },
+        }
+      })
+    )
+  }, [nodes.map((n) => getTaskData(n).taskConfig).join("||"), inputs])
+
+  // Auto-layout with dagre
+  const handleAutoLayout = useCallback(() => {
+    pushHistory()
+    const { nodes: layoutedNodes } = getLayoutedElements(nodes, edges as Edge[], "TB")
+    setNodes(layoutedNodes)
+    setTimeout(() => fitView({ padding: 0.2, maxZoom: 1 }), 50)
+  }, [nodes, edges, setNodes, pushHistory, fitView])
+
+  // Duplicate selected node
+  const handleDuplicate = useCallback(() => {
+    if (!selectedNodeId) return
+    const sourceNode = nodes.find((n) => n.id === selectedNodeId)
+    if (!sourceNode) return
+    pushHistory()
+    const data = getTaskData(sourceNode)
+    const newNode: Node = {
+      id: getId(),
+      type: "taskNode",
+      position: { x: sourceNode.position.x + 50, y: sourceNode.position.y + 100 },
+      data: { ...data, label: data.label + " (副本)" },
+    }
+    setNodes((nds) => nds.concat(newNode))
+  }, [selectedNodeId, nodes, setNodes, pushHistory])
+
   const handleSave = useCallback(() => {
     const blob = new Blob([JSON.stringify({ meta: workflowMeta, inputs, nodes: sortedNodes.map((n) => ({ id: n.id, position: n.position, data: getTaskData(n) })), edges: (edges as Edge[]).map((e) => ({ source: e.source, target: e.target })) }, null, 2)], { type: "application/json" })
     const a = document.createElement("a")
@@ -242,6 +288,8 @@ export default function WorkflowEditorPage() {
           <button onClick={redo} disabled={redoStack.length === 0} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-muted disabled:opacity-30" title="重做">↪️</button>
           <button onClick={() => setRightPanel("inputs")} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-muted" title="输入参数">📥</button>
           <button onClick={() => setRightPanel("yaml")} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-muted" title="YAML">📄</button>
+          <button onClick={handleAutoLayout} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-muted" title="自动布局">📐</button>
+          {selectedNodeId && <button onClick={handleDuplicate} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-muted" title="复制节点">📋</button>}
           {selectedNodeId && <button onClick={handleDeleteSelected} className="w-7 h-7 rounded-md text-sm flex items-center justify-center hover:bg-red-50" title="删除">🗑️</button>}
         </div>
       </div>
