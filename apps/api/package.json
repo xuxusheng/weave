@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",
+    "@prisma/client": "^7.5.0",
     "@trpc/server": "^11.1.2",
+    "dotenv": "^17.3.1",
     "hono": "^4.7.0",
+    "prisma": "^7.5.0",
     "superjson": "^2.2.2",
     "zod": "^3.24.0"
   },

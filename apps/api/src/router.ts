@@ -1,6 +1,7 @@
 import { initTRPC } from "@trpc/server"
 import { z } from "zod"
 import superjson from "superjson"
+import { prisma } from "./db.js"
 
 const t = initTRPC.create({ transformer: superjson })
 
@@ -8,24 +9,19 @@ const appRouter = t.router({
   // Health check
   health: t.procedure.query(() => ({ status: "ok", timestamp: new Date() })),
 
-  // Workflow CRUD (placeholder)
+  // Workflow CRUD
   workflow: t.router({
     list: t.procedure.query(() => {
-      return [{ id: "demo", name: "Demo Workflow", createdAt: new Date() }]
+      return prisma.workflow.findMany({
+        orderBy: { updatedAt: "desc" },
+        select: { id: true, name: true, namespace: true, createdAt: true, updatedAt: true },
+      })
     }),
 
     get: t.procedure
       .input(z.object({ id: z.string() }))
       .query(({ input }) => {
-        return {
-          id: input.id,
-          name: "Demo Workflow",
-          nodes: [],
-          edges: [],
-          inputs: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
+        return prisma.workflow.findUnique({ where: { id: input.id } })
       }),
 
     create: t.procedure
@@ -33,18 +29,37 @@ const appRouter = t.router({
         z.object({
           name: z.string().min(1),
           namespace: z.string().default("company.team"),
+          description: z.string().optional(),
           nodes: z.array(z.any()).default([]),
           edges: z.array(z.any()).default([]),
           inputs: z.array(z.any()).default([]),
         }),
       )
       .mutation(({ input }) => {
-        return {
-          id: `wf_${Date.now()}`,
-          ...input,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
+        return prisma.workflow.create({ data: input })
+      }),
+
+    update: t.procedure
+      .input(
+        z.object({
+          id: z.string(),
+          name: z.string().optional(),
+          namespace: z.string().optional(),
+          description: z.string().optional(),
+          nodes: z.array(z.any()).optional(),
+          edges: z.array(z.any()).optional(),
+          inputs: z.array(z.any()).optional(),
+        }),
+      )
+      .mutation(({ input }) => {
+        const { id, ...data } = input
+        return prisma.workflow.update({ where: { id }, data })
+      }),
+
+    delete: t.procedure
+      .input(z.object({ id: z.string() }))
+      .mutation(({ input }) => {
+        return prisma.workflow.delete({ where: { id: input.id } })
       }),
 
     generateYaml: t.procedure
