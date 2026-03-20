@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react"
+import { useState, useCallback, useRef, useMemo, useEffect } from "react"
 import {
   ReactFlow,
   Controls,
@@ -8,6 +8,7 @@ import {
   useNodesState,
   useEdgesState,
   BackgroundVariant,
+  useReactFlow,
 } from "@xyflow/react"
 import type { Connection, Node, Edge } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
@@ -18,6 +19,18 @@ import { InputConfigPanel } from "@/components/flow/InputConfigPanel"
 import { KestraYamlPanel } from "@/components/flow/KestraYamlPanel"
 import { DEFAULT_TASK_YAML } from "@/types/kestra"
 import type { KestraInput } from "@/types/kestra"
+
+// Auto-fit the view on mount and window resize
+function FitViewOnMount() {
+  const { fitView } = useReactFlow()
+  useEffect(() => {
+    const timer = setTimeout(() => fitView({ padding: 0.2, maxZoom: 1 }), 100)
+    const handleResize = () => fitView({ padding: 0.2, maxZoom: 1 })
+    window.addEventListener("resize", handleResize)
+    return () => { clearTimeout(timer); window.removeEventListener("resize", handleResize) }
+  }, [fitView])
+  return null
+}
 
 const nodeTypes = { taskNode: TaskNode }
 
@@ -281,9 +294,13 @@ export default function WorkflowEditorPage() {
             onDrop={onDrop}
             nodeTypes={nodeTypes}
             fitView
+            fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+            minZoom={0.2}
+            maxZoom={2}
             className="bg-muted/30"
             defaultEdgeOptions={{ animated: true, style: { stroke: "#818cf8", strokeWidth: 2 } }}
           >
+            <FitViewOnMount />
             <Controls className="!bg-card !border !border-border !rounded-lg !shadow-sm" />
             <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#e2e8f0" />
             <MiniMap className="!bg-card !border !border-border !rounded-lg hidden md:block" nodeColor="#818cf8" />
