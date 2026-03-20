@@ -107,7 +107,7 @@ export function TaskConfigPanel({
   }, [])
 
   return (
-    <div className="panel-enter fixed top-0 right-0 h-screen w-[480px] bg-card border-l border-border shadow-xl z-50 flex flex-col">
+    <div className="panel-enter fixed top-0 right-0 h-screen w-full md:w-[480px] bg-card border-l border-border shadow-xl z-50 flex flex-col">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-lg">⚙️</span>
