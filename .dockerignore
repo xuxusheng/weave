@@ -1,6 +1,9 @@
 node_modules
-dist
 .git
 *.md
 .cjs
 test.cjs
+test-*.cjs
+.github
+.scripts
+scripts

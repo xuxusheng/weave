@@ -6,7 +6,6 @@ SRC="node_modules/monaco-editor/min/vs"
 rm -rf "$DEST"
 mkdir -p "$DEST"
 
-# Copy everything except node_modules
 cp -r "$SRC"/* "$DEST/"
 
-echo "✅ Monaco files copied ($(du -sh "$DEST" | cut -f1))"
+echo "Monaco files copied"
