@@ -1,8 +1,11 @@
-import { defineConfig } from 'vite-plus';
+import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   staged: {
-    "*": "vp check --fix"
+    "*": "vp check --fix",
   },
-  lint: {"options":{"typeAware":true,"typeCheck":true}},
+  lint: {
+    ignorePatterns: ["**/generated/**"],
+    options: { typeAware: true, typeCheck: true },
+  },
 });

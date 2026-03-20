@@ -1,7 +1,6 @@
 {
   "name": "monaco-variable-editor",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "vp run -r dev",
     "dev:web": "vp run -F @monaco-editor/web dev",
@@ -13,5 +12,6 @@
   },
   "devDependencies": {
     "vite-plus": "catalog:"
-  }
+  },
+  "packageManager": "pnpm@9.15.4"
 }
