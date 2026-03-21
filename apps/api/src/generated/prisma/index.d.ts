@@ -14,6 +14,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 
 /**
+ * Model Namespace
+ * 
+ */
+export type Namespace = $Result.DefaultSelection<Prisma.$NamespacePayload>
+/**
  * Model Workflow
  * 
  */
@@ -28,8 +33,8 @@ export type Workflow = $Result.DefaultSelection<Prisma.$WorkflowPayload>
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Workflows
- * const workflows = await prisma.workflow.findMany()
+ * // Fetch zero or more Namespaces
+ * const namespaces = await prisma.namespace.findMany()
  * ```
  *
  *
@@ -51,8 +56,8 @@ export class PrismaClient<
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Workflows
-   * const workflows = await prisma.workflow.findMany()
+   * // Fetch zero or more Namespaces
+   * const namespaces = await prisma.namespace.findMany()
    * ```
    *
    *
@@ -141,6 +146,16 @@ export class PrismaClient<
   }>>
 
       /**
+   * `prisma.namespace`: Exposes CRUD operations for the **Namespace** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Namespaces
+    * const namespaces = await prisma.namespace.findMany()
+    * ```
+    */
+  get namespace(): Prisma.NamespaceDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.workflow`: Exposes CRUD operations for the **Workflow** model.
     * Example usage:
     * ```ts
@@ -583,6 +598,7 @@ export namespace Prisma {
 
 
   export const ModelName: {
+    Namespace: 'Namespace',
     Workflow: 'Workflow'
   };
 
@@ -599,10 +615,84 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "workflow"
+      modelProps: "namespace" | "workflow"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
+      Namespace: {
+        payload: Prisma.$NamespacePayload<ExtArgs>
+        fields: Prisma.NamespaceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NamespaceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NamespaceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          findFirst: {
+            args: Prisma.NamespaceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NamespaceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          findMany: {
+            args: Prisma.NamespaceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>[]
+          }
+          create: {
+            args: Prisma.NamespaceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          createMany: {
+            args: Prisma.NamespaceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NamespaceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>[]
+          }
+          delete: {
+            args: Prisma.NamespaceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          update: {
+            args: Prisma.NamespaceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          deleteMany: {
+            args: Prisma.NamespaceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NamespaceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NamespaceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>[]
+          }
+          upsert: {
+            args: Prisma.NamespaceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NamespacePayload>
+          }
+          aggregate: {
+            args: Prisma.NamespaceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNamespace>
+          }
+          groupBy: {
+            args: Prisma.NamespaceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NamespaceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NamespaceCountArgs<ExtArgs>
+            result: $Utils.Optional<NamespaceCountAggregateOutputType> | number
+          }
+        }
+      }
       Workflow: {
         payload: Prisma.$WorkflowPayload<ExtArgs>
         fields: Prisma.WorkflowFieldRefs
@@ -785,6 +875,7 @@ export namespace Prisma {
     comments?: runtime.SqlCommenterPlugin[]
   }
   export type GlobalOmitConfig = {
+    namespace?: NamespaceOmit
     workflow?: WorkflowOmit
   }
 
@@ -861,10 +952,1113 @@ export namespace Prisma {
    */
 
 
+  /**
+   * Count Type NamespaceCountOutputType
+   */
+
+  export type NamespaceCountOutputType = {
+    workflows: number
+  }
+
+  export type NamespaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    workflows?: boolean | NamespaceCountOutputTypeCountWorkflowsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * NamespaceCountOutputType without action
+   */
+  export type NamespaceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NamespaceCountOutputType
+     */
+    select?: NamespaceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * NamespaceCountOutputType without action
+   */
+  export type NamespaceCountOutputTypeCountWorkflowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WorkflowWhereInput
+  }
+
 
   /**
    * Models
    */
+
+  /**
+   * Model Namespace
+   */
+
+  export type AggregateNamespace = {
+    _count: NamespaceCountAggregateOutputType | null
+    _min: NamespaceMinAggregateOutputType | null
+    _max: NamespaceMaxAggregateOutputType | null
+  }
+
+  export type NamespaceMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NamespaceMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NamespaceCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type NamespaceMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NamespaceMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NamespaceCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type NamespaceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Namespace to aggregate.
+     */
+    where?: NamespaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Namespaces to fetch.
+     */
+    orderBy?: NamespaceOrderByWithRelationInput | NamespaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NamespaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Namespaces from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Namespaces.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Namespaces
+    **/
+    _count?: true | NamespaceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NamespaceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NamespaceMaxAggregateInputType
+  }
+
+  export type GetNamespaceAggregateType<T extends NamespaceAggregateArgs> = {
+        [P in keyof T & keyof AggregateNamespace]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNamespace[P]>
+      : GetScalarType<T[P], AggregateNamespace[P]>
+  }
+
+
+
+
+  export type NamespaceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NamespaceWhereInput
+    orderBy?: NamespaceOrderByWithAggregationInput | NamespaceOrderByWithAggregationInput[]
+    by: NamespaceScalarFieldEnum[] | NamespaceScalarFieldEnum
+    having?: NamespaceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NamespaceCountAggregateInputType | true
+    _min?: NamespaceMinAggregateInputType
+    _max?: NamespaceMaxAggregateInputType
+  }
+
+  export type NamespaceGroupByOutputType = {
+    id: string
+    name: string
+    description: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: NamespaceCountAggregateOutputType | null
+    _min: NamespaceMinAggregateOutputType | null
+    _max: NamespaceMaxAggregateOutputType | null
+  }
+
+  type GetNamespaceGroupByPayload<T extends NamespaceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NamespaceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NamespaceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NamespaceGroupByOutputType[P]>
+            : GetScalarType<T[P], NamespaceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NamespaceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    workflows?: boolean | Namespace$workflowsArgs<ExtArgs>
+    _count?: boolean | NamespaceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["namespace"]>
+
+  export type NamespaceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["namespace"]>
+
+  export type NamespaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["namespace"]>
+
+  export type NamespaceSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type NamespaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["namespace"]>
+  export type NamespaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    workflows?: boolean | Namespace$workflowsArgs<ExtArgs>
+    _count?: boolean | NamespaceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type NamespaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type NamespaceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $NamespacePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Namespace"
+    objects: {
+      workflows: Prisma.$WorkflowPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      description: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["namespace"]>
+    composites: {}
+  }
+
+  type NamespaceGetPayload<S extends boolean | null | undefined | NamespaceDefaultArgs> = $Result.GetResult<Prisma.$NamespacePayload, S>
+
+  type NamespaceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NamespaceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NamespaceCountAggregateInputType | true
+    }
+
+  export interface NamespaceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Namespace'], meta: { name: 'Namespace' } }
+    /**
+     * Find zero or one Namespace that matches the filter.
+     * @param {NamespaceFindUniqueArgs} args - Arguments to find a Namespace
+     * @example
+     * // Get one Namespace
+     * const namespace = await prisma.namespace.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NamespaceFindUniqueArgs>(args: SelectSubset<T, NamespaceFindUniqueArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Namespace that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NamespaceFindUniqueOrThrowArgs} args - Arguments to find a Namespace
+     * @example
+     * // Get one Namespace
+     * const namespace = await prisma.namespace.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NamespaceFindUniqueOrThrowArgs>(args: SelectSubset<T, NamespaceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Namespace that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceFindFirstArgs} args - Arguments to find a Namespace
+     * @example
+     * // Get one Namespace
+     * const namespace = await prisma.namespace.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NamespaceFindFirstArgs>(args?: SelectSubset<T, NamespaceFindFirstArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Namespace that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceFindFirstOrThrowArgs} args - Arguments to find a Namespace
+     * @example
+     * // Get one Namespace
+     * const namespace = await prisma.namespace.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NamespaceFindFirstOrThrowArgs>(args?: SelectSubset<T, NamespaceFindFirstOrThrowArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Namespaces that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Namespaces
+     * const namespaces = await prisma.namespace.findMany()
+     * 
+     * // Get first 10 Namespaces
+     * const namespaces = await prisma.namespace.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const namespaceWithIdOnly = await prisma.namespace.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NamespaceFindManyArgs>(args?: SelectSubset<T, NamespaceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Namespace.
+     * @param {NamespaceCreateArgs} args - Arguments to create a Namespace.
+     * @example
+     * // Create one Namespace
+     * const Namespace = await prisma.namespace.create({
+     *   data: {
+     *     // ... data to create a Namespace
+     *   }
+     * })
+     * 
+     */
+    create<T extends NamespaceCreateArgs>(args: SelectSubset<T, NamespaceCreateArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Namespaces.
+     * @param {NamespaceCreateManyArgs} args - Arguments to create many Namespaces.
+     * @example
+     * // Create many Namespaces
+     * const namespace = await prisma.namespace.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NamespaceCreateManyArgs>(args?: SelectSubset<T, NamespaceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Namespaces and returns the data saved in the database.
+     * @param {NamespaceCreateManyAndReturnArgs} args - Arguments to create many Namespaces.
+     * @example
+     * // Create many Namespaces
+     * const namespace = await prisma.namespace.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Namespaces and only return the `id`
+     * const namespaceWithIdOnly = await prisma.namespace.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NamespaceCreateManyAndReturnArgs>(args?: SelectSubset<T, NamespaceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Namespace.
+     * @param {NamespaceDeleteArgs} args - Arguments to delete one Namespace.
+     * @example
+     * // Delete one Namespace
+     * const Namespace = await prisma.namespace.delete({
+     *   where: {
+     *     // ... filter to delete one Namespace
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NamespaceDeleteArgs>(args: SelectSubset<T, NamespaceDeleteArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Namespace.
+     * @param {NamespaceUpdateArgs} args - Arguments to update one Namespace.
+     * @example
+     * // Update one Namespace
+     * const namespace = await prisma.namespace.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NamespaceUpdateArgs>(args: SelectSubset<T, NamespaceUpdateArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Namespaces.
+     * @param {NamespaceDeleteManyArgs} args - Arguments to filter Namespaces to delete.
+     * @example
+     * // Delete a few Namespaces
+     * const { count } = await prisma.namespace.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NamespaceDeleteManyArgs>(args?: SelectSubset<T, NamespaceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Namespaces.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Namespaces
+     * const namespace = await prisma.namespace.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NamespaceUpdateManyArgs>(args: SelectSubset<T, NamespaceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Namespaces and returns the data updated in the database.
+     * @param {NamespaceUpdateManyAndReturnArgs} args - Arguments to update many Namespaces.
+     * @example
+     * // Update many Namespaces
+     * const namespace = await prisma.namespace.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Namespaces and only return the `id`
+     * const namespaceWithIdOnly = await prisma.namespace.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NamespaceUpdateManyAndReturnArgs>(args: SelectSubset<T, NamespaceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Namespace.
+     * @param {NamespaceUpsertArgs} args - Arguments to update or create a Namespace.
+     * @example
+     * // Update or create a Namespace
+     * const namespace = await prisma.namespace.upsert({
+     *   create: {
+     *     // ... data to create a Namespace
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Namespace we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NamespaceUpsertArgs>(args: SelectSubset<T, NamespaceUpsertArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Namespaces.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceCountArgs} args - Arguments to filter Namespaces to count.
+     * @example
+     * // Count the number of Namespaces
+     * const count = await prisma.namespace.count({
+     *   where: {
+     *     // ... the filter for the Namespaces we want to count
+     *   }
+     * })
+    **/
+    count<T extends NamespaceCountArgs>(
+      args?: Subset<T, NamespaceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NamespaceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Namespace.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NamespaceAggregateArgs>(args: Subset<T, NamespaceAggregateArgs>): Prisma.PrismaPromise<GetNamespaceAggregateType<T>>
+
+    /**
+     * Group by Namespace.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NamespaceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NamespaceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NamespaceGroupByArgs['orderBy'] }
+        : { orderBy?: NamespaceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NamespaceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNamespaceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Namespace model
+   */
+  readonly fields: NamespaceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Namespace.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NamespaceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    workflows<T extends Namespace$workflowsArgs<ExtArgs> = {}>(args?: Subset<T, Namespace$workflowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Namespace model
+   */
+  interface NamespaceFieldRefs {
+    readonly id: FieldRef<"Namespace", 'String'>
+    readonly name: FieldRef<"Namespace", 'String'>
+    readonly description: FieldRef<"Namespace", 'String'>
+    readonly createdAt: FieldRef<"Namespace", 'DateTime'>
+    readonly updatedAt: FieldRef<"Namespace", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Namespace findUnique
+   */
+  export type NamespaceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter, which Namespace to fetch.
+     */
+    where: NamespaceWhereUniqueInput
+  }
+
+  /**
+   * Namespace findUniqueOrThrow
+   */
+  export type NamespaceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter, which Namespace to fetch.
+     */
+    where: NamespaceWhereUniqueInput
+  }
+
+  /**
+   * Namespace findFirst
+   */
+  export type NamespaceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter, which Namespace to fetch.
+     */
+    where?: NamespaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Namespaces to fetch.
+     */
+    orderBy?: NamespaceOrderByWithRelationInput | NamespaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Namespaces.
+     */
+    cursor?: NamespaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Namespaces from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Namespaces.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Namespaces.
+     */
+    distinct?: NamespaceScalarFieldEnum | NamespaceScalarFieldEnum[]
+  }
+
+  /**
+   * Namespace findFirstOrThrow
+   */
+  export type NamespaceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter, which Namespace to fetch.
+     */
+    where?: NamespaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Namespaces to fetch.
+     */
+    orderBy?: NamespaceOrderByWithRelationInput | NamespaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Namespaces.
+     */
+    cursor?: NamespaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Namespaces from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Namespaces.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Namespaces.
+     */
+    distinct?: NamespaceScalarFieldEnum | NamespaceScalarFieldEnum[]
+  }
+
+  /**
+   * Namespace findMany
+   */
+  export type NamespaceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter, which Namespaces to fetch.
+     */
+    where?: NamespaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Namespaces to fetch.
+     */
+    orderBy?: NamespaceOrderByWithRelationInput | NamespaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Namespaces.
+     */
+    cursor?: NamespaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Namespaces from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Namespaces.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Namespaces.
+     */
+    distinct?: NamespaceScalarFieldEnum | NamespaceScalarFieldEnum[]
+  }
+
+  /**
+   * Namespace create
+   */
+  export type NamespaceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Namespace.
+     */
+    data: XOR<NamespaceCreateInput, NamespaceUncheckedCreateInput>
+  }
+
+  /**
+   * Namespace createMany
+   */
+  export type NamespaceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Namespaces.
+     */
+    data: NamespaceCreateManyInput | NamespaceCreateManyInput[]
+  }
+
+  /**
+   * Namespace createManyAndReturn
+   */
+  export type NamespaceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Namespaces.
+     */
+    data: NamespaceCreateManyInput | NamespaceCreateManyInput[]
+  }
+
+  /**
+   * Namespace update
+   */
+  export type NamespaceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Namespace.
+     */
+    data: XOR<NamespaceUpdateInput, NamespaceUncheckedUpdateInput>
+    /**
+     * Choose, which Namespace to update.
+     */
+    where: NamespaceWhereUniqueInput
+  }
+
+  /**
+   * Namespace updateMany
+   */
+  export type NamespaceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Namespaces.
+     */
+    data: XOR<NamespaceUpdateManyMutationInput, NamespaceUncheckedUpdateManyInput>
+    /**
+     * Filter which Namespaces to update
+     */
+    where?: NamespaceWhereInput
+    /**
+     * Limit how many Namespaces to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Namespace updateManyAndReturn
+   */
+  export type NamespaceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * The data used to update Namespaces.
+     */
+    data: XOR<NamespaceUpdateManyMutationInput, NamespaceUncheckedUpdateManyInput>
+    /**
+     * Filter which Namespaces to update
+     */
+    where?: NamespaceWhereInput
+    /**
+     * Limit how many Namespaces to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Namespace upsert
+   */
+  export type NamespaceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Namespace to update in case it exists.
+     */
+    where: NamespaceWhereUniqueInput
+    /**
+     * In case the Namespace found by the `where` argument doesn't exist, create a new Namespace with this data.
+     */
+    create: XOR<NamespaceCreateInput, NamespaceUncheckedCreateInput>
+    /**
+     * In case the Namespace was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NamespaceUpdateInput, NamespaceUncheckedUpdateInput>
+  }
+
+  /**
+   * Namespace delete
+   */
+  export type NamespaceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+    /**
+     * Filter which Namespace to delete.
+     */
+    where: NamespaceWhereUniqueInput
+  }
+
+  /**
+   * Namespace deleteMany
+   */
+  export type NamespaceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Namespaces to delete
+     */
+    where?: NamespaceWhereInput
+    /**
+     * Limit how many Namespaces to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Namespace.workflows
+   */
+  export type Namespace$workflowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Workflow
+     */
+    select?: WorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Workflow
+     */
+    omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
+    where?: WorkflowWhereInput
+    orderBy?: WorkflowOrderByWithRelationInput | WorkflowOrderByWithRelationInput[]
+    cursor?: WorkflowWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WorkflowScalarFieldEnum | WorkflowScalarFieldEnum[]
+  }
+
+  /**
+   * Namespace without action
+   */
+  export type NamespaceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Namespace
+     */
+    select?: NamespaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Namespace
+     */
+    omit?: NamespaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NamespaceInclude<ExtArgs> | null
+  }
+
 
   /**
    * Model Workflow
@@ -879,9 +2073,11 @@ export namespace Prisma {
   export type WorkflowMinAggregateOutputType = {
     id: string | null
     name: string | null
-    namespace: string | null
+    flowId: string | null
+    namespaceId: string | null
     description: string | null
-    yaml: string | null
+    disabled: boolean | null
+    publishedVersion: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -889,9 +2085,11 @@ export namespace Prisma {
   export type WorkflowMaxAggregateOutputType = {
     id: string | null
     name: string | null
-    namespace: string | null
+    flowId: string | null
+    namespaceId: string | null
     description: string | null
-    yaml: string | null
+    disabled: boolean | null
+    publishedVersion: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -899,12 +2097,15 @@ export namespace Prisma {
   export type WorkflowCountAggregateOutputType = {
     id: number
     name: number
-    namespace: number
+    flowId: number
+    namespaceId: number
     description: number
     nodes: number
     edges: number
     inputs: number
-    yaml: number
+    variables: number
+    disabled: number
+    publishedVersion: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -914,9 +2115,11 @@ export namespace Prisma {
   export type WorkflowMinAggregateInputType = {
     id?: true
     name?: true
-    namespace?: true
+    flowId?: true
+    namespaceId?: true
     description?: true
-    yaml?: true
+    disabled?: true
+    publishedVersion?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -924,9 +2127,11 @@ export namespace Prisma {
   export type WorkflowMaxAggregateInputType = {
     id?: true
     name?: true
-    namespace?: true
+    flowId?: true
+    namespaceId?: true
     description?: true
-    yaml?: true
+    disabled?: true
+    publishedVersion?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -934,12 +2139,15 @@ export namespace Prisma {
   export type WorkflowCountAggregateInputType = {
     id?: true
     name?: true
-    namespace?: true
+    flowId?: true
+    namespaceId?: true
     description?: true
     nodes?: true
     edges?: true
     inputs?: true
-    yaml?: true
+    variables?: true
+    disabled?: true
+    publishedVersion?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1020,12 +2228,15 @@ export namespace Prisma {
   export type WorkflowGroupByOutputType = {
     id: string
     name: string
-    namespace: string
+    flowId: string
+    namespaceId: string
     description: string | null
     nodes: JsonValue
     edges: JsonValue
     inputs: JsonValue
-    yaml: string | null
+    variables: JsonValue
+    disabled: boolean
+    publishedVersion: string | null
     createdAt: Date
     updatedAt: Date
     _count: WorkflowCountAggregateOutputType | null
@@ -1050,69 +2261,98 @@ export namespace Prisma {
   export type WorkflowSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    namespace?: boolean
+    flowId?: boolean
+    namespaceId?: boolean
     description?: boolean
     nodes?: boolean
     edges?: boolean
     inputs?: boolean
-    yaml?: boolean
+    variables?: boolean
+    disabled?: boolean
+    publishedVersion?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["workflow"]>
 
   export type WorkflowSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    namespace?: boolean
+    flowId?: boolean
+    namespaceId?: boolean
     description?: boolean
     nodes?: boolean
     edges?: boolean
     inputs?: boolean
-    yaml?: boolean
+    variables?: boolean
+    disabled?: boolean
+    publishedVersion?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["workflow"]>
 
   export type WorkflowSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    namespace?: boolean
+    flowId?: boolean
+    namespaceId?: boolean
     description?: boolean
     nodes?: boolean
     edges?: boolean
     inputs?: boolean
-    yaml?: boolean
+    variables?: boolean
+    disabled?: boolean
+    publishedVersion?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["workflow"]>
 
   export type WorkflowSelectScalar = {
     id?: boolean
     name?: boolean
-    namespace?: boolean
+    flowId?: boolean
+    namespaceId?: boolean
     description?: boolean
     nodes?: boolean
     edges?: boolean
     inputs?: boolean
-    yaml?: boolean
+    variables?: boolean
+    disabled?: boolean
+    publishedVersion?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WorkflowOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "namespace" | "description" | "nodes" | "edges" | "inputs" | "yaml" | "createdAt" | "updatedAt", ExtArgs["result"]["workflow"]>
+  export type WorkflowOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "flowId" | "namespaceId" | "description" | "nodes" | "edges" | "inputs" | "variables" | "disabled" | "publishedVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["workflow"]>
+  export type WorkflowInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
+  }
+  export type WorkflowIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
+  }
+  export type WorkflowIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    namespace?: boolean | NamespaceDefaultArgs<ExtArgs>
+  }
 
   export type $WorkflowPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Workflow"
-    objects: {}
+    objects: {
+      namespace: Prisma.$NamespacePayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
-      namespace: string
+      flowId: string
+      namespaceId: string
       description: string | null
       nodes: Prisma.JsonValue
       edges: Prisma.JsonValue
       inputs: Prisma.JsonValue
-      yaml: string | null
+      variables: Prisma.JsonValue
+      disabled: boolean
+      publishedVersion: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["workflow"]>
@@ -1509,6 +2749,7 @@ export namespace Prisma {
    */
   export interface Prisma__WorkflowClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    namespace<T extends NamespaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NamespaceDefaultArgs<ExtArgs>>): Prisma__NamespaceClient<$Result.GetResult<Prisma.$NamespacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1540,12 +2781,15 @@ export namespace Prisma {
   interface WorkflowFieldRefs {
     readonly id: FieldRef<"Workflow", 'String'>
     readonly name: FieldRef<"Workflow", 'String'>
-    readonly namespace: FieldRef<"Workflow", 'String'>
+    readonly flowId: FieldRef<"Workflow", 'String'>
+    readonly namespaceId: FieldRef<"Workflow", 'String'>
     readonly description: FieldRef<"Workflow", 'String'>
     readonly nodes: FieldRef<"Workflow", 'Json'>
     readonly edges: FieldRef<"Workflow", 'Json'>
     readonly inputs: FieldRef<"Workflow", 'Json'>
-    readonly yaml: FieldRef<"Workflow", 'String'>
+    readonly variables: FieldRef<"Workflow", 'Json'>
+    readonly disabled: FieldRef<"Workflow", 'Boolean'>
+    readonly publishedVersion: FieldRef<"Workflow", 'String'>
     readonly createdAt: FieldRef<"Workflow", 'DateTime'>
     readonly updatedAt: FieldRef<"Workflow", 'DateTime'>
   }
@@ -1565,6 +2809,10 @@ export namespace Prisma {
      */
     omit?: WorkflowOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
+    /**
      * Filter, which Workflow to fetch.
      */
     where: WorkflowWhereUniqueInput
@@ -1583,6 +2831,10 @@ export namespace Prisma {
      */
     omit?: WorkflowOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
+    /**
      * Filter, which Workflow to fetch.
      */
     where: WorkflowWhereUniqueInput
@@ -1600,6 +2852,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
     /**
      * Filter, which Workflow to fetch.
      */
@@ -1649,6 +2905,10 @@ export namespace Prisma {
      */
     omit?: WorkflowOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
+    /**
      * Filter, which Workflow to fetch.
      */
     where?: WorkflowWhereInput
@@ -1696,6 +2956,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
     /**
      * Filter, which Workflows to fetch.
      */
@@ -1745,6 +3009,10 @@ export namespace Prisma {
      */
     omit?: WorkflowOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
+    /**
      * The data needed to create a Workflow.
      */
     data: XOR<WorkflowCreateInput, WorkflowUncheckedCreateInput>
@@ -1776,6 +3044,10 @@ export namespace Prisma {
      * The data used to create many Workflows.
      */
     data: WorkflowCreateManyInput | WorkflowCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -1790,6 +3062,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
     /**
      * The data needed to update a Workflow.
      */
@@ -1842,6 +3118,10 @@ export namespace Prisma {
      * Limit how many Workflows to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -1856,6 +3136,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
     /**
      * The filter to search for the Workflow to update in case it exists.
      */
@@ -1882,6 +3166,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
     /**
      * Filter which Workflow to delete.
      */
@@ -1914,6 +3202,10 @@ export namespace Prisma {
      * Omit specific fields from the Workflow
      */
     omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkflowInclude<ExtArgs> | null
   }
 
 
@@ -1928,15 +3220,29 @@ export namespace Prisma {
   export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+  export const NamespaceScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type NamespaceScalarFieldEnum = (typeof NamespaceScalarFieldEnum)[keyof typeof NamespaceScalarFieldEnum]
+
+
   export const WorkflowScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    namespace: 'namespace',
+    flowId: 'flowId',
+    namespaceId: 'namespaceId',
     description: 'description',
     nodes: 'nodes',
     edges: 'edges',
     inputs: 'inputs',
-    yaml: 'yaml',
+    variables: 'variables',
+    disabled: 'disabled',
+    publishedVersion: 'publishedVersion',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -1959,6 +3265,14 @@ export namespace Prisma {
   export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
   export const JsonNullValueFilter: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull,
@@ -1976,14 +3290,6 @@ export namespace Prisma {
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-  export const NullsOrder: {
-    first: 'first',
-    last: 'last'
-  };
-
-  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
   /**
    * Field references
    */
@@ -1993,6 +3299,13 @@ export namespace Prisma {
    * Reference to a field of type 'String'
    */
   export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 
@@ -2011,9 +3324,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'DateTime'
+   * Reference to a field of type 'Boolean'
    */
-  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2027,33 +3340,96 @@ export namespace Prisma {
    */
 
 
+  export type NamespaceWhereInput = {
+    AND?: NamespaceWhereInput | NamespaceWhereInput[]
+    OR?: NamespaceWhereInput[]
+    NOT?: NamespaceWhereInput | NamespaceWhereInput[]
+    id?: StringFilter<"Namespace"> | string
+    name?: StringFilter<"Namespace"> | string
+    description?: StringNullableFilter<"Namespace"> | string | null
+    createdAt?: DateTimeFilter<"Namespace"> | Date | string
+    updatedAt?: DateTimeFilter<"Namespace"> | Date | string
+    workflows?: WorkflowListRelationFilter
+  }
+
+  export type NamespaceOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    workflows?: WorkflowOrderByRelationAggregateInput
+  }
+
+  export type NamespaceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: NamespaceWhereInput | NamespaceWhereInput[]
+    OR?: NamespaceWhereInput[]
+    NOT?: NamespaceWhereInput | NamespaceWhereInput[]
+    name?: StringFilter<"Namespace"> | string
+    description?: StringNullableFilter<"Namespace"> | string | null
+    createdAt?: DateTimeFilter<"Namespace"> | Date | string
+    updatedAt?: DateTimeFilter<"Namespace"> | Date | string
+    workflows?: WorkflowListRelationFilter
+  }, "id">
+
+  export type NamespaceOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: NamespaceCountOrderByAggregateInput
+    _max?: NamespaceMaxOrderByAggregateInput
+    _min?: NamespaceMinOrderByAggregateInput
+  }
+
+  export type NamespaceScalarWhereWithAggregatesInput = {
+    AND?: NamespaceScalarWhereWithAggregatesInput | NamespaceScalarWhereWithAggregatesInput[]
+    OR?: NamespaceScalarWhereWithAggregatesInput[]
+    NOT?: NamespaceScalarWhereWithAggregatesInput | NamespaceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Namespace"> | string
+    name?: StringWithAggregatesFilter<"Namespace"> | string
+    description?: StringNullableWithAggregatesFilter<"Namespace"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Namespace"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Namespace"> | Date | string
+  }
+
   export type WorkflowWhereInput = {
     AND?: WorkflowWhereInput | WorkflowWhereInput[]
     OR?: WorkflowWhereInput[]
     NOT?: WorkflowWhereInput | WorkflowWhereInput[]
     id?: StringFilter<"Workflow"> | string
     name?: StringFilter<"Workflow"> | string
-    namespace?: StringFilter<"Workflow"> | string
+    flowId?: StringFilter<"Workflow"> | string
+    namespaceId?: StringFilter<"Workflow"> | string
     description?: StringNullableFilter<"Workflow"> | string | null
     nodes?: JsonFilter<"Workflow">
     edges?: JsonFilter<"Workflow">
     inputs?: JsonFilter<"Workflow">
-    yaml?: StringNullableFilter<"Workflow"> | string | null
+    variables?: JsonFilter<"Workflow">
+    disabled?: BoolFilter<"Workflow"> | boolean
+    publishedVersion?: StringNullableFilter<"Workflow"> | string | null
     createdAt?: DateTimeFilter<"Workflow"> | Date | string
     updatedAt?: DateTimeFilter<"Workflow"> | Date | string
+    namespace?: XOR<NamespaceScalarRelationFilter, NamespaceWhereInput>
   }
 
   export type WorkflowOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
-    namespace?: SortOrder
+    flowId?: SortOrder
+    namespaceId?: SortOrder
     description?: SortOrderInput | SortOrder
     nodes?: SortOrder
     edges?: SortOrder
     inputs?: SortOrder
-    yaml?: SortOrderInput | SortOrder
+    variables?: SortOrder
+    disabled?: SortOrder
+    publishedVersion?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    namespace?: NamespaceOrderByWithRelationInput
   }
 
   export type WorkflowWhereUniqueInput = Prisma.AtLeast<{
@@ -2062,25 +3438,32 @@ export namespace Prisma {
     OR?: WorkflowWhereInput[]
     NOT?: WorkflowWhereInput | WorkflowWhereInput[]
     name?: StringFilter<"Workflow"> | string
-    namespace?: StringFilter<"Workflow"> | string
+    flowId?: StringFilter<"Workflow"> | string
+    namespaceId?: StringFilter<"Workflow"> | string
     description?: StringNullableFilter<"Workflow"> | string | null
     nodes?: JsonFilter<"Workflow">
     edges?: JsonFilter<"Workflow">
     inputs?: JsonFilter<"Workflow">
-    yaml?: StringNullableFilter<"Workflow"> | string | null
+    variables?: JsonFilter<"Workflow">
+    disabled?: BoolFilter<"Workflow"> | boolean
+    publishedVersion?: StringNullableFilter<"Workflow"> | string | null
     createdAt?: DateTimeFilter<"Workflow"> | Date | string
     updatedAt?: DateTimeFilter<"Workflow"> | Date | string
+    namespace?: XOR<NamespaceScalarRelationFilter, NamespaceWhereInput>
   }, "id">
 
   export type WorkflowOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
-    namespace?: SortOrder
+    flowId?: SortOrder
+    namespaceId?: SortOrder
     description?: SortOrderInput | SortOrder
     nodes?: SortOrder
     edges?: SortOrder
     inputs?: SortOrder
-    yaml?: SortOrderInput | SortOrder
+    variables?: SortOrder
+    disabled?: SortOrder
+    publishedVersion?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: WorkflowCountOrderByAggregateInput
@@ -2094,38 +3477,107 @@ export namespace Prisma {
     NOT?: WorkflowScalarWhereWithAggregatesInput | WorkflowScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Workflow"> | string
     name?: StringWithAggregatesFilter<"Workflow"> | string
-    namespace?: StringWithAggregatesFilter<"Workflow"> | string
+    flowId?: StringWithAggregatesFilter<"Workflow"> | string
+    namespaceId?: StringWithAggregatesFilter<"Workflow"> | string
     description?: StringNullableWithAggregatesFilter<"Workflow"> | string | null
     nodes?: JsonWithAggregatesFilter<"Workflow">
     edges?: JsonWithAggregatesFilter<"Workflow">
     inputs?: JsonWithAggregatesFilter<"Workflow">
-    yaml?: StringNullableWithAggregatesFilter<"Workflow"> | string | null
+    variables?: JsonWithAggregatesFilter<"Workflow">
+    disabled?: BoolWithAggregatesFilter<"Workflow"> | boolean
+    publishedVersion?: StringNullableWithAggregatesFilter<"Workflow"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Workflow"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Workflow"> | Date | string
+  }
+
+  export type NamespaceCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    workflows?: WorkflowCreateNestedManyWithoutNamespaceInput
+  }
+
+  export type NamespaceUncheckedCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    workflows?: WorkflowUncheckedCreateNestedManyWithoutNamespaceInput
+  }
+
+  export type NamespaceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workflows?: WorkflowUpdateManyWithoutNamespaceNestedInput
+  }
+
+  export type NamespaceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workflows?: WorkflowUncheckedUpdateManyWithoutNamespaceNestedInput
+  }
+
+  export type NamespaceCreateManyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NamespaceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NamespaceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type WorkflowCreateInput = {
     id?: string
     name: string
-    namespace?: string
+    flowId: string
     description?: string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    namespace: NamespaceCreateNestedOneWithoutWorkflowsInput
   }
 
   export type WorkflowUncheckedCreateInput = {
     id?: string
     name: string
-    namespace?: string
+    flowId: string
+    namespaceId: string
     description?: string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -2133,25 +3585,31 @@ export namespace Prisma {
   export type WorkflowUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    namespace?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: NullableStringFieldUpdateOperationsInput | string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    namespace?: NamespaceUpdateOneRequiredWithoutWorkflowsNestedInput
   }
 
   export type WorkflowUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    namespace?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
+    namespaceId?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: NullableStringFieldUpdateOperationsInput | string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -2159,12 +3617,15 @@ export namespace Prisma {
   export type WorkflowCreateManyInput = {
     id?: string
     name: string
-    namespace?: string
+    flowId: string
+    namespaceId: string
     description?: string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -2172,12 +3633,14 @@ export namespace Prisma {
   export type WorkflowUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    namespace?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: NullableStringFieldUpdateOperationsInput | string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -2185,12 +3648,15 @@ export namespace Prisma {
   export type WorkflowUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    namespace?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
+    namespaceId?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     nodes?: JsonNullValueInput | InputJsonValue
     edges?: JsonNullValueInput | InputJsonValue
     inputs?: JsonNullValueInput | InputJsonValue
-    yaml?: NullableStringFieldUpdateOperationsInput | string | null
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -2222,24 +3688,6 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -2252,40 +3700,41 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type WorkflowListRelationFilter = {
+    every?: WorkflowWhereInput
+    some?: WorkflowWhereInput
+    none?: WorkflowWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
-  export type WorkflowCountOrderByAggregateInput = {
+  export type WorkflowOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NamespaceCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    namespace?: SortOrder
     description?: SortOrder
-    nodes?: SortOrder
-    edges?: SortOrder
-    inputs?: SortOrder
-    yaml?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type WorkflowMaxOrderByAggregateInput = {
+  export type NamespaceMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    namespace?: SortOrder
     description?: SortOrder
-    yaml?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type WorkflowMinOrderByAggregateInput = {
+  export type NamespaceMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    namespace?: SortOrder
     description?: SortOrder
-    yaml?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -2323,6 +3772,88 @@ export namespace Prisma {
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NamespaceScalarRelationFilter = {
+    is?: NamespaceWhereInput
+    isNot?: NamespaceWhereInput
+  }
+
+  export type WorkflowCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    flowId?: SortOrder
+    namespaceId?: SortOrder
+    description?: SortOrder
+    nodes?: SortOrder
+    edges?: SortOrder
+    inputs?: SortOrder
+    variables?: SortOrder
+    disabled?: SortOrder
+    publishedVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WorkflowMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    flowId?: SortOrder
+    namespaceId?: SortOrder
+    description?: SortOrder
+    disabled?: SortOrder
+    publishedVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WorkflowMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    flowId?: SortOrder
+    namespaceId?: SortOrder
+    description?: SortOrder
+    disabled?: SortOrder
+    publishedVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
@@ -2345,18 +3876,26 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type WorkflowCreateNestedManyWithoutNamespaceInput = {
+    create?: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput> | WorkflowCreateWithoutNamespaceInput[] | WorkflowUncheckedCreateWithoutNamespaceInput[]
+    connectOrCreate?: WorkflowCreateOrConnectWithoutNamespaceInput | WorkflowCreateOrConnectWithoutNamespaceInput[]
+    createMany?: WorkflowCreateManyNamespaceInputEnvelope
+    connect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+  }
+
+  export type WorkflowUncheckedCreateNestedManyWithoutNamespaceInput = {
+    create?: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput> | WorkflowCreateWithoutNamespaceInput[] | WorkflowUncheckedCreateWithoutNamespaceInput[]
+    connectOrCreate?: WorkflowCreateOrConnectWithoutNamespaceInput | WorkflowCreateOrConnectWithoutNamespaceInput[]
+    createMany?: WorkflowCreateManyNamespaceInputEnvelope
+    connect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -2369,6 +3908,52 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type WorkflowUpdateManyWithoutNamespaceNestedInput = {
+    create?: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput> | WorkflowCreateWithoutNamespaceInput[] | WorkflowUncheckedCreateWithoutNamespaceInput[]
+    connectOrCreate?: WorkflowCreateOrConnectWithoutNamespaceInput | WorkflowCreateOrConnectWithoutNamespaceInput[]
+    upsert?: WorkflowUpsertWithWhereUniqueWithoutNamespaceInput | WorkflowUpsertWithWhereUniqueWithoutNamespaceInput[]
+    createMany?: WorkflowCreateManyNamespaceInputEnvelope
+    set?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    disconnect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    delete?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    connect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    update?: WorkflowUpdateWithWhereUniqueWithoutNamespaceInput | WorkflowUpdateWithWhereUniqueWithoutNamespaceInput[]
+    updateMany?: WorkflowUpdateManyWithWhereWithoutNamespaceInput | WorkflowUpdateManyWithWhereWithoutNamespaceInput[]
+    deleteMany?: WorkflowScalarWhereInput | WorkflowScalarWhereInput[]
+  }
+
+  export type WorkflowUncheckedUpdateManyWithoutNamespaceNestedInput = {
+    create?: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput> | WorkflowCreateWithoutNamespaceInput[] | WorkflowUncheckedCreateWithoutNamespaceInput[]
+    connectOrCreate?: WorkflowCreateOrConnectWithoutNamespaceInput | WorkflowCreateOrConnectWithoutNamespaceInput[]
+    upsert?: WorkflowUpsertWithWhereUniqueWithoutNamespaceInput | WorkflowUpsertWithWhereUniqueWithoutNamespaceInput[]
+    createMany?: WorkflowCreateManyNamespaceInputEnvelope
+    set?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    disconnect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    delete?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    connect?: WorkflowWhereUniqueInput | WorkflowWhereUniqueInput[]
+    update?: WorkflowUpdateWithWhereUniqueWithoutNamespaceInput | WorkflowUpdateWithWhereUniqueWithoutNamespaceInput[]
+    updateMany?: WorkflowUpdateManyWithWhereWithoutNamespaceInput | WorkflowUpdateManyWithWhereWithoutNamespaceInput[]
+    deleteMany?: WorkflowScalarWhereInput | WorkflowScalarWhereInput[]
+  }
+
+  export type NamespaceCreateNestedOneWithoutWorkflowsInput = {
+    create?: XOR<NamespaceCreateWithoutWorkflowsInput, NamespaceUncheckedCreateWithoutWorkflowsInput>
+    connectOrCreate?: NamespaceCreateOrConnectWithoutWorkflowsInput
+    connect?: NamespaceWhereUniqueInput
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type NamespaceUpdateOneRequiredWithoutWorkflowsNestedInput = {
+    create?: XOR<NamespaceCreateWithoutWorkflowsInput, NamespaceUncheckedCreateWithoutWorkflowsInput>
+    connectOrCreate?: NamespaceCreateOrConnectWithoutWorkflowsInput
+    upsert?: NamespaceUpsertWithoutWorkflowsInput
+    connect?: NamespaceWhereUniqueInput
+    update?: XOR<XOR<NamespaceUpdateToOneWithWhereWithoutWorkflowsInput, NamespaceUpdateWithoutWorkflowsInput>, NamespaceUncheckedUpdateWithoutWorkflowsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -2465,6 +4050,25 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -2484,18 +4088,194 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type WorkflowCreateWithoutNamespaceInput = {
+    id?: string
+    name: string
+    flowId: string
+    description?: string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkflowUncheckedCreateWithoutNamespaceInput = {
+    id?: string
+    name: string
+    flowId: string
+    description?: string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkflowCreateOrConnectWithoutNamespaceInput = {
+    where: WorkflowWhereUniqueInput
+    create: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput>
+  }
+
+  export type WorkflowCreateManyNamespaceInputEnvelope = {
+    data: WorkflowCreateManyNamespaceInput | WorkflowCreateManyNamespaceInput[]
+  }
+
+  export type WorkflowUpsertWithWhereUniqueWithoutNamespaceInput = {
+    where: WorkflowWhereUniqueInput
+    update: XOR<WorkflowUpdateWithoutNamespaceInput, WorkflowUncheckedUpdateWithoutNamespaceInput>
+    create: XOR<WorkflowCreateWithoutNamespaceInput, WorkflowUncheckedCreateWithoutNamespaceInput>
+  }
+
+  export type WorkflowUpdateWithWhereUniqueWithoutNamespaceInput = {
+    where: WorkflowWhereUniqueInput
+    data: XOR<WorkflowUpdateWithoutNamespaceInput, WorkflowUncheckedUpdateWithoutNamespaceInput>
+  }
+
+  export type WorkflowUpdateManyWithWhereWithoutNamespaceInput = {
+    where: WorkflowScalarWhereInput
+    data: XOR<WorkflowUpdateManyMutationInput, WorkflowUncheckedUpdateManyWithoutNamespaceInput>
+  }
+
+  export type WorkflowScalarWhereInput = {
+    AND?: WorkflowScalarWhereInput | WorkflowScalarWhereInput[]
+    OR?: WorkflowScalarWhereInput[]
+    NOT?: WorkflowScalarWhereInput | WorkflowScalarWhereInput[]
+    id?: StringFilter<"Workflow"> | string
+    name?: StringFilter<"Workflow"> | string
+    flowId?: StringFilter<"Workflow"> | string
+    namespaceId?: StringFilter<"Workflow"> | string
+    description?: StringNullableFilter<"Workflow"> | string | null
+    nodes?: JsonFilter<"Workflow">
+    edges?: JsonFilter<"Workflow">
+    inputs?: JsonFilter<"Workflow">
+    variables?: JsonFilter<"Workflow">
+    disabled?: BoolFilter<"Workflow"> | boolean
+    publishedVersion?: StringNullableFilter<"Workflow"> | string | null
+    createdAt?: DateTimeFilter<"Workflow"> | Date | string
+    updatedAt?: DateTimeFilter<"Workflow"> | Date | string
+  }
+
+  export type NamespaceCreateWithoutWorkflowsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NamespaceUncheckedCreateWithoutWorkflowsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NamespaceCreateOrConnectWithoutWorkflowsInput = {
+    where: NamespaceWhereUniqueInput
+    create: XOR<NamespaceCreateWithoutWorkflowsInput, NamespaceUncheckedCreateWithoutWorkflowsInput>
+  }
+
+  export type NamespaceUpsertWithoutWorkflowsInput = {
+    update: XOR<NamespaceUpdateWithoutWorkflowsInput, NamespaceUncheckedUpdateWithoutWorkflowsInput>
+    create: XOR<NamespaceCreateWithoutWorkflowsInput, NamespaceUncheckedCreateWithoutWorkflowsInput>
+    where?: NamespaceWhereInput
+  }
+
+  export type NamespaceUpdateToOneWithWhereWithoutWorkflowsInput = {
+    where?: NamespaceWhereInput
+    data: XOR<NamespaceUpdateWithoutWorkflowsInput, NamespaceUncheckedUpdateWithoutWorkflowsInput>
+  }
+
+  export type NamespaceUpdateWithoutWorkflowsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NamespaceUncheckedUpdateWithoutWorkflowsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkflowCreateManyNamespaceInput = {
+    id?: string
+    name: string
+    flowId: string
+    description?: string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: boolean
+    publishedVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkflowUpdateWithoutNamespaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkflowUncheckedUpdateWithoutNamespaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkflowUncheckedUpdateManyWithoutNamespaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    flowId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    nodes?: JsonNullValueInput | InputJsonValue
+    edges?: JsonNullValueInput | InputJsonValue
+    inputs?: JsonNullValueInput | InputJsonValue
+    variables?: JsonNullValueInput | InputJsonValue
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    publishedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

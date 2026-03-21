@@ -117,15 +117,26 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.NamespaceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.WorkflowScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  namespace: 'namespace',
+  flowId: 'flowId',
+  namespaceId: 'namespaceId',
   description: 'description',
   nodes: 'nodes',
   edges: 'edges',
   inputs: 'inputs',
-  yaml: 'yaml',
+  variables: 'variables',
+  disabled: 'disabled',
+  publishedVersion: 'publishedVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -139,6 +150,11 @@ exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
@@ -150,13 +166,9 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
-exports.Prisma.NullsOrder = {
-  first: 'first',
-  last: 'last'
-};
-
 
 exports.Prisma.ModelName = {
+  Namespace: 'Namespace',
   Workflow: 'Workflow'
 };
 
