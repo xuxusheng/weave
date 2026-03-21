@@ -4,6 +4,26 @@ import type { NodeProps } from "@xyflow/react"
 import { getNodeColor } from "@/types/workflow"
 import { getOutputHandles } from "@/types/container"
 import { useWorkflowStore } from "@/stores/workflow"
+import type { TaskRun } from "@/stores/workflow"
+
+// ========== Execution state colors ==========
+const STATE_STYLES: Record<string, { border: string; glow: string; pulse?: boolean }> = {
+  CREATED:   { border: "#94a3b8", glow: "0 0 6px #94a3b8" },
+  RUNNING:   { border: "#3b82f6", glow: "0 0 10px #3b82f6", pulse: true },
+  SUCCESS:   { border: "#22c55e", glow: "0 0 6px #22c55e" },
+  FAILED:    { border: "#ef4444", glow: "0 0 10px #ef4444" },
+  WARNING:   { border: "#f59e0b", glow: "0 0 6px #f59e0b" },
+  KILLED:    { border: "#6b7280", glow: "0 0 4px #6b7280" },
+  CANCELLED: { border: "#6b7280", glow: "0 0 4px #6b7280" },
+}
+
+function useExecutionState(nodeId: string) {
+  return useWorkflowStore((s) => {
+    const exec = s.currentExecution
+    if (!exec || !exec.taskRuns) return null
+    return (exec.taskRuns as unknown as TaskRun[]).find((tr) => tr.taskId === nodeId) ?? null
+  })
+}
 
 interface WorkflowNodeData {
   label: string
@@ -21,6 +41,10 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
   const color = getNodeColor(d.type)
   const shortType = d.type.split(".").pop() || d.type
   const toggleCollapse = useWorkflowStore((s) => s.toggleCollapse)
+  const taskRun = useExecutionState(id)
+
+  // Execution state styling
+  const execStyle = taskRun ? STATE_STYLES[taskRun.state] : null
 
   const handleToggleCollapse = useCallback(
     (e: React.MouseEvent) => {
@@ -39,10 +63,11 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
       <div
         className={`relative px-4 py-3 rounded-2xl border-2 border-dashed bg-white shadow-sm min-w-[220px] transition-all ${
           selected ? "shadow-lg" : "hover:shadow-md"
-        }`}
+        } ${execStyle?.pulse ? "animate-pulse" : ""}`}
         style={{
-          borderColor: selected ? color : `${color}88`,
+          borderColor: execStyle ? execStyle.border : selected ? color : `${color}88`,
           background: `${color}08`,
+          boxShadow: execStyle?.glow ?? undefined,
         }}
       >
         {/* 输入 Handle */}
@@ -126,11 +151,12 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
     <div
       className={`relative px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[200px] transition-all ${
         selected ? "shadow-md" : "hover:shadow-md"
-      }`}
+      } ${execStyle?.pulse ? "animate-pulse" : ""}`}
       style={{
-        borderColor: selected ? color : `${color}66`,
+        borderColor: execStyle ? execStyle.border : selected ? color : `${color}66`,
         borderLeftWidth: 4,
-        borderLeftColor: color,
+        borderLeftColor: execStyle ? execStyle.border : color,
+        boxShadow: execStyle?.glow ?? undefined,
       }}
     >
       <Handle
@@ -141,10 +167,14 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
       />
 
       <div className="flex items-center gap-2">
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: color }}
-        />
+        {taskRun ? (
+          <span className="text-xs shrink-0">{execStateIcon(taskRun.state)}</span>
+        ) : (
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: color }}
+          />
+        )}
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground truncate">
             {d.label || "未命名"}
@@ -166,3 +196,16 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
 })
 
 WorkflowNode.displayName = "WorkflowNode"
+
+function execStateIcon(state: string): string {
+  const icons: Record<string, string> = {
+    CREATED: "⏳",
+    RUNNING: "🔄",
+    SUCCESS: "✅",
+    FAILED: "❌",
+    WARNING: "⚠️",
+    KILLED: "💀",
+    CANCELLED: "🚫",
+  }
+  return icons[state] ?? "❓"
+}

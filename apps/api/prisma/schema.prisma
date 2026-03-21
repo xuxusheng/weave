@@ -36,8 +36,11 @@ model Workflow {
   updatedAt        DateTime @updatedAt
 
   namespace Namespace @relation(fields: [namespaceId], references: [id])
-  drafts   WorkflowDraft[]
-  releases WorkflowRelease[]
+  drafts    WorkflowDraft[]
+  releases  WorkflowRelease[]
+  executions WorkflowDraftExecution[]
+  prodExecutions WorkflowExecution[]
+  triggers  WorkflowTrigger[]
 
   @@unique([namespaceId, flowId])
   @@map("workflows")
@@ -77,4 +80,69 @@ model WorkflowRelease {
   @@unique([workflowId, version])
   @@index([workflowId, version(sort: Desc)])
   @@map("workflow_releases")
+
+  executions WorkflowExecution[]
+}
+
+model WorkflowDraftExecution {
+  id            String    @id @default(cuid())
+  workflowId    String
+  kestraExecId  String
+  nodes         Json
+  edges         Json
+  inputs        Json
+  variables     Json
+  inputValues   Json      @default("{}")
+  state         String
+  taskRuns      Json      @default("[]")
+  triggeredBy   String    @default("manual")
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workflow      Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId, createdAt(sort: Desc)])
+  @@map("workflow_draft_executions")
+}
+
+model WorkflowExecution {
+  id            String            @id @default(cuid())
+  workflowId    String
+  releaseId     String
+  kestraExecId  String
+  inputValues   Json              @default("{}")
+  state         String
+  taskRuns      Json              @default("[]")
+  triggeredBy   String            @default("manual")
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  workflow      Workflow          @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  release       WorkflowRelease   @relation(fields: [releaseId], references: [id])
+
+  @@index([workflowId, createdAt(sort: Desc)])
+  @@index([releaseId])
+  @@map("workflow_executions")
+}
+
+model WorkflowTrigger {
+  id            String   @id @default(cuid())
+  workflowId    String
+  name          String
+  type          String
+  config        Json
+  inputs        Json     @default("{}")
+  kestraFlowId  String
+  disabled      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workflow      Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@map("workflow_triggers")
 }
