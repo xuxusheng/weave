@@ -54,7 +54,10 @@ export const ModelName = {
   Namespace: 'Namespace',
   Workflow: 'Workflow',
   WorkflowDraft: 'WorkflowDraft',
-  WorkflowRelease: 'WorkflowRelease'
+  WorkflowRelease: 'WorkflowRelease',
+  WorkflowDraftExecution: 'WorkflowDraftExecution',
+  WorkflowExecution: 'WorkflowExecution',
+  WorkflowTrigger: 'WorkflowTrigger'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -133,6 +136,61 @@ export const WorkflowReleaseScalarFieldEnum = {
 } as const
 
 export type WorkflowReleaseScalarFieldEnum = (typeof WorkflowReleaseScalarFieldEnum)[keyof typeof WorkflowReleaseScalarFieldEnum]
+
+
+export const WorkflowDraftExecutionScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  kestraExecId: 'kestraExecId',
+  nodes: 'nodes',
+  edges: 'edges',
+  inputs: 'inputs',
+  variables: 'variables',
+  inputValues: 'inputValues',
+  state: 'state',
+  taskRuns: 'taskRuns',
+  triggeredBy: 'triggeredBy',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowDraftExecutionScalarFieldEnum = (typeof WorkflowDraftExecutionScalarFieldEnum)[keyof typeof WorkflowDraftExecutionScalarFieldEnum]
+
+
+export const WorkflowExecutionScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  releaseId: 'releaseId',
+  kestraExecId: 'kestraExecId',
+  inputValues: 'inputValues',
+  state: 'state',
+  taskRuns: 'taskRuns',
+  triggeredBy: 'triggeredBy',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowExecutionScalarFieldEnum = (typeof WorkflowExecutionScalarFieldEnum)[keyof typeof WorkflowExecutionScalarFieldEnum]
+
+
+export const WorkflowTriggerScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  name: 'name',
+  type: 'type',
+  config: 'config',
+  inputs: 'inputs',
+  kestraFlowId: 'kestraFlowId',
+  disabled: 'disabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowTriggerScalarFieldEnum = (typeof WorkflowTriggerScalarFieldEnum)[keyof typeof WorkflowTriggerScalarFieldEnum]
 
 
 export const SortOrder = {

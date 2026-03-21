@@ -5,7 +5,7 @@ import { temporal } from "zundo"
 import type { WorkflowNode, WorkflowEdge, WorkflowInput } from "@/types/workflow"
 import { FIXTURE_NODES, FIXTURE_EDGES, FIXTURE_INPUTS } from "@/types/fixtures"
 
-type RightPanel = "none" | "task" | "inputs" | "yaml" | "drafts" | "releases"
+type RightPanel = "none" | "task" | "inputs" | "yaml" | "drafts" | "releases" | "executions"
 
 interface WorkflowMeta {
   flowId: string
@@ -26,6 +26,25 @@ interface ReleaseSummary {
   name: string
   yaml: string
   publishedAt: string
+}
+
+interface TaskRun {
+  id: string
+  taskId: string
+  state: string
+  startDate?: string
+  endDate?: string
+  attempts?: number
+  outputs?: Record<string, unknown>
+}
+
+interface ExecutionSummary {
+  id: string
+  kestraExecId: string
+  state: string
+  taskRuns: TaskRun[]
+  triggeredBy: string
+  createdAt: string
 }
 
 interface WorkflowState {
@@ -50,6 +69,11 @@ interface WorkflowState {
   hasUnsavedChanges: boolean
   lastSavedAt: string | null
 
+  // Execution
+  isExecuting: boolean
+  currentExecution: ExecutionSummary | null
+  kestraHealthy: boolean
+
   // Actions
   setNodes: (
     updater: WorkflowNode[] | ((prev: WorkflowNode[]) => WorkflowNode[]),
@@ -71,7 +95,12 @@ interface WorkflowState {
   markSaved: () => void
   markDirty: () => void
   toggleCollapse: (nodeId: string) => void
+  setIsExecuting: (v: boolean) => void
+  setCurrentExecution: (exec: ExecutionSummary | null) => void
+  setKestraHealthy: (v: boolean) => void
 }
+
+export type { WorkflowMeta, DraftSummary, ReleaseSummary, TaskRun, ExecutionSummary, WorkflowState }
 
 export const useWorkflowStore = create<WorkflowState>()(
   temporal(
@@ -101,6 +130,11 @@ export const useWorkflowStore = create<WorkflowState>()(
       releases: [],
       hasUnsavedChanges: false,
       lastSavedAt: null,
+
+      // Execution
+      isExecuting: false,
+      currentExecution: null,
+      kestraHealthy: false,
 
       // Actions
       setNodes: (updater) =>
@@ -136,6 +170,9 @@ export const useWorkflowStore = create<WorkflowState>()(
           if (!node.ui) node.ui = { x: 0, y: 0 }
           node.ui.collapsed = !node.ui.collapsed
         }),
+      setIsExecuting: (v) => set({ isExecuting: v }),
+      setCurrentExecution: (exec) => set({ currentExecution: exec }),
+      setKestraHealthy: (v) => set({ kestraHealthy: v }),
     })),
     {
       limit: 50,
