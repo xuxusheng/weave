@@ -1,5 +1,5 @@
 {
-  "name": "monaco-variable-editor",
+  "name": "weave",
   "private": true,
   "scripts": {
     "dev": "vp run -r dev",
