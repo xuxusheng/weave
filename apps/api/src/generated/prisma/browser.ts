@@ -37,3 +37,18 @@ export type WorkflowDraft = Prisma.WorkflowDraftModel
  * 
  */
 export type WorkflowRelease = Prisma.WorkflowReleaseModel
+/**
+ * Model WorkflowDraftExecution
+ * 
+ */
+export type WorkflowDraftExecution = Prisma.WorkflowDraftExecutionModel
+/**
+ * Model WorkflowExecution
+ * 
+ */
+export type WorkflowExecution = Prisma.WorkflowExecutionModel
+/**
+ * Model WorkflowTrigger
+ * 
+ */
+export type WorkflowTrigger = Prisma.WorkflowTriggerModel

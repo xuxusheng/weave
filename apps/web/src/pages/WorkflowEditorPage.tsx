@@ -1,4 +1,9 @@
 import { useCallback, useRef, useMemo, useEffect, memo, useState } from "react"
+import type { TaskRun } from "@/stores/workflow"
+
+function isTerminalState(state: string): boolean {
+  return ["SUCCESS", "WARNING", "FAILED", "KILLED", "CANCELLED", "RETRIED"].includes(state)
+}
 import { nameToSlug } from "@/lib/slug"
 import {
   ReactFlow,
@@ -23,6 +28,9 @@ import { KestraYamlPanel } from "@/components/flow/KestraYamlPanel"
 import { DraftHistory } from "@/components/flow/DraftHistory"
 import { ReleaseHistory } from "@/components/flow/ReleaseHistory"
 import { PublishDialog } from "@/components/flow/PublishDialog"
+import { ExecutionDrawer } from "@/components/flow/ExecutionDrawer"
+import { ExecutionHistory } from "@/components/flow/ExecutionHistory"
+import { InputValuesForm } from "@/components/flow/InputValuesForm"
 import { ContextMenu as NodeContextMenu } from "@/components/flow/ContextMenu"
 import { getLayoutedElements } from "@/lib/autoLayout"
 import { filterVisibleNodes, filterVisibleEdges, getChildCount } from "@/lib/containerUtils"
@@ -704,6 +712,129 @@ export default function WorkflowEditorPage() {
     return () => clearInterval(timer)
   }, [savedWorkflowId, hasUnsavedChanges, handleSaveDraft])
 
+  // ─── M4: Execution ───
+  const isExecuting = useWorkflowStore((s) => s.isExecuting)
+  const setIsExecuting = useWorkflowStore((s) => s.setIsExecuting)
+  const currentExecution = useWorkflowStore((s) => s.currentExecution)
+  const setCurrentExecution = useWorkflowStore((s) => s.setCurrentExecution)
+  const kestraHealthy = useWorkflowStore((s) => s.kestraHealthy)
+  const setKestraHealthy = useWorkflowStore((s) => s.setKestraHealthy)
+  const [showInputForm, setShowInputForm] = useState(false)
+
+  // Kestra health check (on mount + every 5 min)
+  useEffect(() => {
+    const check = () => {
+      utils.workflow.kestraHealth.fetch().then((res) => {
+        setKestraHealthy(res.healthy)
+      }).catch(() => setKestraHealthy(false))
+    }
+    check()
+    const timer = setInterval(check, 5 * 60_000)
+    return () => clearInterval(timer)
+  }, [utils, setKestraHealthy])
+
+  // Execution polling (3s interval, stops on terminal state)
+  useEffect(() => {
+    if (!currentExecution || isTerminalState(currentExecution.state)) {
+      if (isExecuting) setIsExecuting(false)
+      return
+    }
+
+    const timer = setInterval(async () => {
+      try {
+        const result = await utils.workflow.executionGet.fetch({
+          executionId: currentExecution.id,
+        })
+        if (result) {
+          setCurrentExecution({
+            id: result.id,
+            kestraExecId: result.kestraExecId,
+            state: result.state,
+            taskRuns: (result.taskRuns ?? []) as unknown as TaskRun[],
+            triggeredBy: result.triggeredBy,
+            createdAt: result.createdAt instanceof Date
+              ? result.createdAt.toISOString()
+              : String(result.createdAt),
+          })
+          if (isTerminalState(result.state)) {
+            setIsExecuting(false)
+            if (result.state === "SUCCESS") {
+              toast.success("执行完成 ✅")
+            } else if (result.state === "FAILED") {
+              toast.error("执行失败 ❌")
+            }
+          }
+        }
+      } catch { /* poll error silent */ }
+    }, 3000)
+
+    return () => clearInterval(timer)
+  }, [currentExecution?.id, currentExecution?.state, isExecuting])
+
+  const executeTest = trpc.workflow.executeTest.useMutation({
+    onSuccess: (result) => {
+      setIsExecuting(true)
+      setCurrentExecution({
+        id: result.id,
+        kestraExecId: result.kestraExecId,
+        state: result.state,
+        taskRuns: (result.taskRuns ?? []) as unknown as TaskRun[],
+        triggeredBy: result.triggeredBy,
+        createdAt: result.createdAt instanceof Date
+          ? result.createdAt.toISOString()
+          : String(result.createdAt),
+      })
+      toast.success("测试执行已触发")
+      setShowInputForm(false)
+    },
+    onError: (err) => toast.error(`执行失败: ${err.message}`),
+  })
+
+  const executionReplay = trpc.workflow.executionReplay.useMutation({
+    onSuccess: (result) => {
+      setIsExecuting(true)
+      setCurrentExecution({
+        id: result.id,
+        kestraExecId: result.kestraExecId,
+        state: result.state,
+        taskRuns: (result.taskRuns ?? []) as unknown as TaskRun[],
+        triggeredBy: result.triggeredBy,
+        createdAt: result.createdAt instanceof Date
+          ? result.createdAt.toISOString()
+          : String(result.createdAt),
+      })
+      toast.success("Replay 已触发")
+    },
+    onError: (err) => toast.error(`Replay 失败: ${err.message}`),
+  })
+
+  const handleExecuteTest = useCallback(() => {
+    if (!savedWorkflowId) {
+      toast.warning("请先保存工作流")
+      return
+    }
+    if (inputs.length > 0) {
+      setShowInputForm(true)
+    } else {
+      executeTest.mutate({ workflowId: savedWorkflowId })
+    }
+  }, [savedWorkflowId, inputs, executeTest])
+
+  const handleExecuteWithInputs = useCallback(
+    (inputValues: Record<string, string>) => {
+      if (!savedWorkflowId) return
+      executeTest.mutate({ workflowId: savedWorkflowId, inputValues })
+    },
+    [savedWorkflowId, executeTest],
+  )
+
+  const handleReplay = useCallback(
+    (executionId: string, taskRunId: string) => {
+      executionReplay.mutate({ executionId, taskRunId })
+    },
+    [executionReplay],
+  )
+
   // YAML import handler
   const handleYamlImport = useCallback(
     (data: { nodes: WorkflowNode[]; edges: WorkflowEdge[]; inputs: WorkflowInput[] }) => {
@@ -897,6 +1028,31 @@ export default function WorkflowEditorPage() {
           >
             📄 YAML
           </button>
+
+          <div className="w-px h-5 bg-border" />
+
+          {/* Kestra health indicator */}
+          <div className="flex items-center gap-1 px-1" title={kestraHealthy ? "Kestra 已连接" : "Kestra 未连接"}>
+            <div className={`w-2 h-2 rounded-full ${kestraHealthy ? "bg-green-500" : "bg-red-400"}`} />
+            <span className="text-[10px] text-muted-foreground hidden lg:inline">Kestra</span>
+          </div>
+
+          <button
+            onClick={handleExecuteTest}
+            disabled={!savedWorkflowId || !kestraHealthy || isExecuting}
+            title={!savedWorkflowId ? "请先保存工作流" : !kestraHealthy ? "Kestra 未连接" : "运行测试"}
+            className="px-2 py-1 rounded-md text-xs font-medium bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
+          >
+            ▶ 运行
+          </button>
+
+          <button
+            onClick={() => setRightPanel("executions")}
+            title="执行历史"
+            className="px-2 py-1 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+          >
+            📋 执行
+          </button>
         </div>
       </div>
 
@@ -1067,6 +1223,33 @@ export default function WorkflowEditorPage() {
           isPublishing={releasePublish.isPending}
           onPublish={handlePublish}
           onClose={() => setShowPublishDialog(false)}
+        />
+      )}
+
+      {/* M4: Execution */}
+      {currentExecution && (
+        <ExecutionDrawer
+          onClose={() => setCurrentExecution(null)}
+          onReplay={handleReplay}
+        />
+      )}
+
+      {showInputForm && (
+        <InputValuesForm
+          inputs={inputs}
+          onSubmit={handleExecuteWithInputs}
+          onCancel={() => setShowInputForm(false)}
+        />
+      )}
+
+      {rightPanel === "executions" && savedWorkflowId && (
+        <ExecutionHistory
+          workflowId={savedWorkflowId}
+          onSelect={(exec) => {
+            setCurrentExecution(exec)
+            setRightPanel("none")
+          }}
+          onClose={() => setRightPanel("none")}
         />
       )}
     </div>
