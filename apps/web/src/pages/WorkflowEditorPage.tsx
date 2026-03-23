@@ -49,6 +49,8 @@ import { Breadcrumb } from "@/components/flow/Breadcrumb"
 import { TemplateDialog } from "@/components/flow/TemplateDialog"
 import { EditorTabBar, type TabKey } from "@/components/flow/EditorTabBar"
 import { CanvasToolbar } from "@/components/flow/CanvasToolbar"
+import { SearchOverlay } from "@/components/flow/SearchOverlay"
+import { ReferenceStatusBar } from "@/components/flow/ReferenceStatusBar"
 import type { WorkflowTemplate } from "@/lib/templates"
 import { saveUserTemplate } from "@/lib/templates"
 import { getLayoutedElements } from "@/lib/autoLayout"
@@ -57,11 +59,10 @@ import { isContainer } from "@/types/container"
 import {
   Rocket, Play,
   ScrollText,
-  Search, X,
+  Search,
   Plus,
-  AlertTriangle, ArrowLeft,
+  ArrowLeft,
   MoreHorizontal, FileCode2, GitBranch, History, Settings2,
-  ChevronRight,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { Button } from "@/components/ui/button"
@@ -180,7 +181,6 @@ export default function WorkflowEditorPage() {
   const [wfVariables, setWfVariables] = useState<ApiWorkflowVariable[]>([])
 
   // ---- 引用检测 ----
-  const [missingRefsExpanded, setMissingRefsExpanded] = useState(false)
   const [dragOverContainerId, setDragOverContainerId] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState<"variables" | "secrets">("variables")
 
@@ -866,7 +866,6 @@ export default function WorkflowEditorPage() {
       }
       if (missingRefs.length > 0) {
         toast.error(`有 ${missingRefs.length} 个缺失引用，请先修复后再发布`)
-        setMissingRefsExpanded(true)
         return
       }
       releasePublish.mutate({ workflowId: savedWorkflowId, name, yaml })
@@ -1460,51 +1459,14 @@ export default function WorkflowEditorPage() {
 
         {/* Ctrl+F 搜索定位 */}
         {searchOpen && (
-          <div className="absolute top-2 left-2 right-2 z-50 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-80 md:max-w-[calc(100%-1rem)] bg-card border border-border rounded-lg shadow-lg">
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
-              <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && searchResults.length > 0) {
-                    handleSearchSelect(searchResults[0].id)
-                  }
-                }}
-                placeholder="搜索节点名称..."
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => { setSearchOpen(false); setSearchQuery("") }}
-                className="w-5 h-5"
-              >
-                <X className="w-3.5 h-3.5 text-muted-foreground" />
-              </Button>
-            </div>
-            {searchQuery.trim() && (
-              <div className="max-h-60 overflow-y-auto py-1">
-                {searchResults.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-muted-foreground">无匹配节点</div>
-                ) : (
-                  searchResults.map((node) => (
-                    <Button
-                      key={node.id}
-                      variant="ghost"
-                      onClick={() => handleSearchSelect(node.id)}
-                      className="w-full text-left px-3 py-1.5 text-sm h-auto justify-start"
-                    >
-                      <span className="truncate">{node.name}</span>
-                      <span className="text-[10px] text-muted-foreground ml-auto shrink-0">{node.type}</span>
-                    </Button>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+          <SearchOverlay
+            searchQuery={searchQuery}
+            onQueryChange={setSearchQuery}
+            results={searchResults}
+            onSelect={handleSearchSelect}
+            onClose={() => { setSearchOpen(false); setSearchQuery("") }}
+            inputRef={searchInputRef}
+          />
         )}
 
         {/* 左侧插件面板 — 桌面端 */}
@@ -1727,55 +1689,10 @@ export default function WorkflowEditorPage() {
       />
 
       {/* 底部状态条：缺失引用 */}
-      {missingRefs.length > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-sm">
-          <button
-            onClick={() => setMissingRefsExpanded(!missingRefsExpanded)}
-            className="w-full flex items-center gap-2 px-4 py-2 text-xs hover:bg-muted/50 transition-colors"
-          >
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-            <span className="font-medium text-amber-600 dark:text-amber-400">
-              {missingRefs.length} 个缺失引用
-            </span>
-            <span className="text-muted-foreground">
-              — 发布前请先修复
-            </span>
-            <ChevronRight className={`w-3.5 h-3.5 ml-auto text-muted-foreground transition-transform ${missingRefsExpanded ? "rotate-90" : ""}`} />
-          </button>
-
-          {missingRefsExpanded && (
-            <div className="px-4 pb-3 space-y-1.5 max-h-48 overflow-y-auto border-t">
-              {missingRefs.map((ref, i) => (
-                <div key={i} className="flex items-center justify-between gap-2 text-sm bg-muted/50 rounded-md px-3 py-1.5">
-                  <div className="min-w-0 flex items-center gap-2">
-                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-                      ref.type === "secret" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                      : ref.type === "variable" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                      : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                    }`}>
-                      {ref.type === "secret" ? "密钥" : ref.type === "variable" ? "变量" : "输入"}
-                    </span>
-                    <span className="font-mono text-xs">{ref.name}</span>
-                  </div>
-                  {(ref.type === "secret" || ref.type === "variable") && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigateToSettings(ref.type === "secret" ? "secrets" : "variables")
-                      }}
-                    >
-                      去创建
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <ReferenceStatusBar
+        missingRefs={missingRefs}
+        onNavigateToSettings={navigateToSettings}
+      />
 
     </div>
   )
