@@ -70,6 +70,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useIsMobile } from "@/hooks/use-mobile"
+// hooks/useAutoSave + useExecutionPoll 待接入（需要调整 handleSaveDraft 回调顺序）
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type {
   WorkflowNode,
