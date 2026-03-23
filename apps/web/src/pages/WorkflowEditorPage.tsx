@@ -2,7 +2,6 @@ import { useCallback, useRef, useMemo, useEffect, memo, useState } from "react"
 import { useParams, Link } from "@tanstack/react-router"
 import type { RunningSnapshot } from "@/stores/workflow"
 import {
-  isTerminalState,
   toExecutionSummary,
   inferEdgeType,
   fromApiNode,
@@ -70,7 +69,8 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useIsMobile } from "@/hooks/use-mobile"
-// hooks/useAutoSave + useExecutionPoll 待接入（需要调整 handleSaveDraft 回调顺序）
+import { useAutoSave } from "@/hooks/useAutoSave"
+import { useKestraHealthCheck, useExecutionPoll } from "@/hooks/useExecutionPoll"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import type {
   WorkflowNode,
@@ -858,6 +858,12 @@ export default function WorkflowEditorPage() {
     [savedWorkflowId, draftSave, missingRefs, wfNodes, wfEdges, inputs, wfVariables],
   )
 
+  // Auto-save (30s) + 脏标记 — 由 hook 接管
+  const { isLoadingRef } = useAutoSave({
+    savedWorkflowId,
+    onSave: handleSaveDraft,
+  })
+
   // Publish action — 缺失引用时阻止发布
   const handlePublish = useCallback(
     (name: string, yaml: string) => {
@@ -904,7 +910,6 @@ export default function WorkflowEditorPage() {
     releases: s.releases,
     publishedVersion: s.publishedVersion,
   })))
-  const markDirty = useWorkflowStore((s) => s.markDirty)
   const markSaved = useWorkflowStore((s) => s.markSaved)
   const setPublishedVersion = useWorkflowStore((s) => s.setPublishedVersion)
 
@@ -918,41 +923,6 @@ export default function WorkflowEditorPage() {
       return undefined
     }
   }, [releasesQuery.data])
-
-  // 首次加载标记：首次渲染不触发 markDirty；已脏时跳过冗余调用
-  const isInitialMount = useRef(true)
-  // API 数据加载期间跳过 markDirty，避免加载数据误触发脏标记
-  const isLoadingRef = useRef(false)
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-      return
-    }
-    if (isLoadingRef.current) return
-    // 避免在已经 dirty 时重复触发 set
-    if (!hasUnsavedChanges) {
-      markDirty()
-    }
-  }, [wfNodes, wfEdges, inputs, markDirty, hasUnsavedChanges])
-
-  // Auto-save timer (30s) — recursive setTimeout with ref to avoid stale closure
-  const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
-  hasUnsavedChangesRef.current = hasUnsavedChanges
-  const handleSaveDraftRef = useRef(handleSaveDraft)
-  handleSaveDraftRef.current = handleSaveDraft
-  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => {
-    if (!savedWorkflowId) return
-    function tick() {
-      if (hasUnsavedChangesRef.current && handleSaveDraftRef.current) {
-        handleSaveDraftRef.current("自动暂存")
-      }
-      autoSaveTimerRef.current = setTimeout(tick, 30_000)
-    }
-    autoSaveTimerRef.current = setTimeout(tick, 30_000)
-    return () => clearTimeout(autoSaveTimerRef.current)
-  }, [savedWorkflowId])
 
   // ─── M4: Execution ───
   const {
@@ -968,87 +938,12 @@ export default function WorkflowEditorPage() {
   })))
   const setIsExecuting = useWorkflowStore((s) => s.setIsExecuting)
   const setCurrentExecution = useWorkflowStore((s) => s.setCurrentExecution)
-  const setKestraHealthy = useWorkflowStore((s) => s.setKestraHealthy)
   const [showInputForm, setShowInputForm] = useState(false)
   const [showTriggerForm, setShowTriggerForm] = useState(false)
 
-  // Kestra health check (on mount + every 5 min) — with abort on unmount
-  const healthTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => {
-    let isMounted = true
-    const utilsRef = utils
-    const check = () => {
-      utilsRef.workflow.kestraHealth.fetch().then((res) => {
-        if (isMounted) setKestraHealthy(res.healthy, res.error)
-      }).catch((err) => {
-        if (isMounted) setKestraHealthy(false, err instanceof Error ? err.message : "健康检查失败")
-      }).finally(() => {
-        if (isMounted) healthTimerRef.current = setTimeout(check, 5 * 60_000)
-      })
-    }
-    check()
-    return () => {
-      isMounted = false
-      clearTimeout(healthTimerRef.current)
-    }
-  }, [utils, setKestraHealthy])
-
-  // Execution polling — recursive setTimeout with refs to avoid stale closure & request pileup
-  const currentExecutionRef = useRef(currentExecution)
-  currentExecutionRef.current = currentExecution
-  const utilsRef = useRef(utils)
-  utilsRef.current = utils
-  const setCurrentExecutionRef = useRef(setCurrentExecution)
-  setCurrentExecutionRef.current = setCurrentExecution
-  const setIsExecutingRef = useRef(setIsExecuting)
-  setIsExecutingRef.current = setIsExecuting
-  const exitRunningModeRef = useRef(exitRunningMode)
-  exitRunningModeRef.current = exitRunningMode
-  const pollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => {
-    const exec = currentExecutionRef.current
-    if (!exec || isTerminalState(exec.state)) {
-      if (isExecuting) setIsExecuting(false)
-      return
-    }
-
-    let isMounted = true
-    function tick() {
-      const exec = currentExecutionRef.current
-      if (!exec || !isMounted) return
-      utilsRef.current.workflow.executionGet.fetch({
-        executionId: exec.id,
-      }).then((result) => {
-        if (!isMounted || !result) return
-        setCurrentExecutionRef.current(toExecutionSummary(result))
-        if (isTerminalState(result.state)) {
-          setIsExecutingRef.current(false)
-          exitRunningModeRef.current()
-          if (result.state === "SUCCESS") {
-            toast.success("执行完成")
-          } else if (result.state === "FAILED") {
-            toast.error("执行失败")
-          } else if (result.state === "WARNING") {
-            toast.warning("执行完成（有警告）")
-          } else if (result.state === "KILLED") {
-            toast.warning("执行已终止")
-          } else if (result.state === "CANCELLED") {
-            toast.info("执行已取消")
-          }
-          return // stop polling
-        }
-        pollTimerRef.current = setTimeout(tick, 3000)
-      }).catch(() => {
-        if (isMounted) pollTimerRef.current = setTimeout(tick, 3000)
-      })
-    }
-    pollTimerRef.current = setTimeout(tick, 3000)
-
-    return () => {
-      isMounted = false
-      clearTimeout(pollTimerRef.current)
-    }
-  }, [currentExecution?.id, currentExecution?.state, isExecuting])
+  // Execution polling + Kestra health check — 由 hooks 接管
+  useExecutionPoll()
+  useKestraHealthCheck()
 
   const executeTest = trpc.workflow.executeTest.useMutation({
     onSuccess: (result) => {
