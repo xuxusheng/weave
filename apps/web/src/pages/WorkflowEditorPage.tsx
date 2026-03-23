@@ -55,6 +55,7 @@ import { saveUserTemplate } from "@/lib/templates"
 import { getLayoutedElements } from "@/lib/autoLayout"
 import { filterVisibleNodes, filterVisibleEdges, canExpandContainer } from "@/lib/containerUtils"
 import { isContainer } from "@/types/container"
+import { CONTAINER_MIN_WIDTH, CONTAINER_MIN_HEIGHT } from "@/lib/containerConstants"
 import {
   Rocket, Play,
   ScrollText,
@@ -410,16 +411,17 @@ export default function WorkflowEditorPage() {
     // 检测悬浮在哪个展开的容器上方
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY })
     let found: string | null = null
-    for (const n of wfNodes) {
-      if (!isContainer(n.type) || n.ui?.collapsed) continue
-      const w = 220, h = 80
-      const nx = n.ui?.x ?? 150, ny = n.ui?.y ?? 50
-      if (position.x >= nx && position.x <= nx + w && position.y >= ny && position.y <= ny + h) {
+    for (const n of getNodes()) {
+      if (!isContainer(n.type ?? "") || n.data?.collapsed) continue
+      const w = n.measured?.width ?? CONTAINER_MIN_WIDTH
+      const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT
+      if (position.x >= n.position.x && position.x <= n.position.x + w &&
+          position.y >= n.position.y && position.y <= n.position.y + h) {
         found = n.id
       }
     }
     setDragOverContainerId(found)
-  }, [screenToFlowPosition, wfNodes])
+  }, [screenToFlowPosition, getNodes])
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
@@ -448,15 +450,13 @@ export default function WorkflowEditorPage() {
 
       // 判断 drop 位置是否在某个展开的容器节点内
       let targetContainerId: string | null = null
-      for (const n of currentNodes) {
-        if (!isContainer(n.type) || n.ui?.collapsed) continue
-        const w = 220 // min-w-[220px] from WorkflowNode container style
-        const h = 80  // approximate container height
-        const nx = n.ui?.x ?? 150
-        const ny = n.ui?.y ?? 50
+      for (const n of getNodes()) {
+        if (!isContainer(n.type ?? "") || n.data?.collapsed) continue
+        const w = n.measured?.width ?? CONTAINER_MIN_WIDTH
+        const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT
         if (
-          position.x >= nx && position.x <= nx + w &&
-          position.y >= ny && position.y <= ny + h
+          position.x >= n.position.x && position.x <= n.position.x + w &&
+          position.y >= n.position.y && position.y <= n.position.y + h
         ) {
           targetContainerId = n.id
         }
@@ -478,7 +478,7 @@ export default function WorkflowEditorPage() {
       setWfNodes((prev) => [...prev, newNode])
       setDragOverContainerId(null)
     },
-    [screenToFlowPosition, setWfNodes],
+    [screenToFlowPosition, setWfNodes, getNodes],
   )
 
   const onDragLeave = useCallback(() => {
