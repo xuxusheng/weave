@@ -412,7 +412,7 @@ export default function WorkflowEditorPage() {
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY })
     let found: string | null = null
     for (const n of getNodes()) {
-      if (!isContainer(n.type ?? "") || n.data?.collapsed) continue
+      if (!isContainer(String(n.data?.type ?? "")) || n.data?.collapsed) continue
       const w = n.measured?.width ?? CONTAINER_MIN_WIDTH
       const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT
       if (position.x >= n.position.x && position.x <= n.position.x + w &&
@@ -451,7 +451,7 @@ export default function WorkflowEditorPage() {
       // 判断 drop 位置是否在某个展开的容器节点内
       let targetContainerId: string | null = null
       for (const n of getNodes()) {
-        if (!isContainer(n.type ?? "") || n.data?.collapsed) continue
+        if (!isContainer(String(n.data?.type ?? "")) || n.data?.collapsed) continue
         const w = n.measured?.width ?? CONTAINER_MIN_WIDTH
         const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT
         if (
