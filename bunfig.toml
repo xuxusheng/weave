@@ -1,0 +1,9 @@
+[install]
+peer = true
+
+[install.scopes]
+"@voidzero-dev" = "https://registry.npmjs.org"
+
+[install.overrides]
+"vite" = "@voidzero-dev/vite-plus-core@0.1.13"
+"vitest" = "@voidzero-dev/vite-plus-test@0.1.13"

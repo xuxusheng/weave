@@ -1,23 +1,23 @@
 {
   "name": "weave",
   "private": true,
+  "workspaces": ["apps/*"],
   "scripts": {
-    "dev": "vp run -r dev",
-    "dev:web": "vp run -F @weave/web dev",
-    "dev:api": "vp run -F @weave/api dev",
-    "build": "vp run -r build",
-    "check": "vp run -r check",
-    "lint": "vp run -r lint",
-    "start": "vp run -r start",
+    "dev": "bun run --filter '*' dev",
+    "dev:web": "bun run --filter @weave/web dev",
+    "dev:api": "bun run --filter @weave/api dev",
+    "build": "bun run --filter '*' build",
+    "check": "bun run --filter '*' check",
+    "lint": "bun run --filter '*' lint",
+    "start": "bun run --filter '*' start",
     "prepare": "husky"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "vite-plus": "catalog:"
+    "vite-plus": "0.1.13"
   },
-  "packageManager": "pnpm@9.15.4",
   "dependencies": {
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^1.0.1"
   }
 }
