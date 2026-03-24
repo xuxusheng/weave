@@ -4,3 +4,9 @@ dist
 .turbo
 *.md
 .github
+.env
+.env.*
+.DS_Store
+*.log
+.vscode
+.idea
