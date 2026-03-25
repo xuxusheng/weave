@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { temporal } from "zundo";
+import { travel } from "zustand-travel";
 import type { WorkflowNode, WorkflowEdge, WorkflowInput } from "@/types/workflow";
 import { FIXTURE_NODES, FIXTURE_EDGES, FIXTURE_INPUTS } from "@/types/fixtures";
 
@@ -171,7 +171,7 @@ export type {
 };
 
 export const useWorkflowStore = create<WorkflowState>()(
-  temporal(
+  travel(
     immer((set) => ({
       // Initial data
       nodes: FIXTURE_NODES,
@@ -344,16 +344,14 @@ export const useWorkflowStore = create<WorkflowState>()(
         }),
     })),
     {
-      limit: 50,
-      wrapTemporal: immer,
+      maxHistory: 50,
     },
   ),
 );
 
-// Undo/redo hooks
-export const useUndo = () => useWorkflowStore.temporal.getState().undo;
-export const useRedo = () => useWorkflowStore.temporal.getState().redo;
-export const useCanUndo = () =>
-  useStore(useWorkflowStore.temporal, (state) => state.pastStates.length > 0);
-export const useCanRedo = () =>
-  useStore(useWorkflowStore.temporal, (state) => state.futureStates.length > 0);
+// Undo/redo hooks - zustand-travel provides controls via getControls()
+const controls = useWorkflowStore.getControls();
+export const useUndo = () => controls.back;
+export const useRedo = () => controls.forward;
+export const useCanUndo = () => useStore(useWorkflowStore, () => controls.canBack());
+export const useCanRedo = () => useStore(useWorkflowStore, () => controls.canForward());

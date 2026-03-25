@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { AlertTriangle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { MissingReference } from "@/lib/referenceChecker";
@@ -28,7 +29,10 @@ export const ReferenceStatusBar = memo(function ReferenceStatusBar({
         </span>
         <span className="text-muted-foreground">— 发布前请先修复</span>
         <ChevronRight
-          className={`w-3.5 h-3.5 ml-auto text-muted-foreground transition-transform ${expanded ? "rotate-90" : ""}`}
+          className={cn(
+            "w-3.5 h-3.5 ml-auto text-muted-foreground transition-transform",
+            expanded ? "rotate-90" : "",
+          )}
         />
       </button>
 
@@ -41,13 +45,14 @@ export const ReferenceStatusBar = memo(function ReferenceStatusBar({
             >
               <div className="min-w-0 flex items-center gap-2">
                 <span
-                  className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                  className={cn(
+                    "text-xs font-medium px-1.5 py-0.5 rounded",
                     ref.type === "secret"
                       ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
                       : ref.type === "variable"
                         ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  }`}
+                        : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+                  )}
                 >
                   {ref.type === "secret" ? "密钥" : ref.type === "variable" ? "变量" : "输入"}
                 </span>

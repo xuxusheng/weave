@@ -1,9 +1,24 @@
 /**
  * API 数据转换层 — API ↔ 前端类型
  */
+import { z } from "zod";
 import type { WorkflowNode, WorkflowEdge, WorkflowInput, EdgeType } from "@/types/workflow";
 import type { ExecutionSummary, TaskRun } from "@/stores/workflow";
 import type { ApiWorkflowNode, ApiWorkflowEdge, ApiWorkflowInput } from "@/types/api";
+
+const TaskRunSchema = z
+  .object({
+    id: z.string().optional(),
+    taskId: z.string().optional(),
+    state: z.union([z.string(), z.object({ current: z.string() }).passthrough()]).optional(),
+    startDate: z.union([z.string(), z.date()]).optional(),
+    endDate: z.union([z.string(), z.date()]).optional(),
+    attempts: z.number().optional(),
+    outputs: z.record(z.string(), z.unknown()).optional(),
+  })
+  .passthrough();
+
+const TaskRunsArraySchema = z.array(TaskRunSchema);
 
 export function fromApiNode(n: ApiWorkflowNode): WorkflowNode {
   return {
@@ -40,19 +55,52 @@ export function fromApiInput(i: ApiWorkflowInput): WorkflowInput {
   };
 }
 
-/** 根据 sourceHandle 推断边类型 */
-export function inferEdgeType(sourceHandle: string | null): EdgeType {
+function inferEdgeType(sourceHandle: string | null): EdgeType {
   if (sourceHandle === "then" || sourceHandle === "else") return sourceHandle;
   if (sourceHandle?.startsWith("case-")) return "case";
   return "sequence";
 }
 
-export function isTerminalState(state: string): boolean {
-  return ["SUCCESS", "WARNING", "FAILED", "KILLED", "CANCELLED", "RETRIED"].includes(state);
+function parseTaskRun(raw: Record<string, unknown>): TaskRun {
+  const idValue = raw.id;
+  const taskIdValue = raw.taskId;
+  const stateValue = raw.state;
+
+  let stateStr = "UNKNOWN";
+  if (typeof stateValue === "string") {
+    stateStr = stateValue;
+  } else if (typeof stateValue === "object" && stateValue !== null && "current" in stateValue) {
+    const currentState = (stateValue as Record<string, unknown>).current;
+    stateStr = typeof currentState === "string" ? currentState : "UNKNOWN";
+  }
+
+  return {
+    id: typeof idValue === "string" ? idValue : idValue != null ? JSON.stringify(idValue) : "",
+    taskId:
+      typeof taskIdValue === "string"
+        ? taskIdValue
+        : taskIdValue != null
+          ? JSON.stringify(taskIdValue)
+          : "",
+    state: stateStr,
+    startDate:
+      raw.startDate instanceof Date
+        ? raw.startDate.toISOString()
+        : typeof raw.startDate === "string"
+          ? raw.startDate
+          : undefined,
+    endDate:
+      raw.endDate instanceof Date
+        ? raw.endDate.toISOString()
+        : typeof raw.endDate === "string"
+          ? raw.endDate
+          : undefined,
+    attempts: typeof raw.attempts === "number" ? raw.attempts : undefined,
+    outputs: raw.outputs as Record<string, unknown> | undefined,
+  };
 }
 
-/** 将 API 返回的执行记录转为 store 格式 */
-export function toExecutionSummary(result: {
+function toExecutionSummary(result: {
   id: string;
   kestraExecId: string;
   state: string;
@@ -61,45 +109,11 @@ export function toExecutionSummary(result: {
   createdAt: Date | string;
   endedAt?: Date | string | null;
 }): ExecutionSummary {
-  const raw = (result.taskRuns ?? []) as Record<string, unknown>[];
-  const taskRuns: TaskRun[] = raw.map((tr) => {
-    const idValue = tr.id;
-    const taskIdValue = tr.taskId;
-    const stateValue = tr.state;
+  const parseResult = TaskRunsArraySchema.safeParse(result.taskRuns ?? []);
+  const rawArray = parseResult.success ? parseResult.data : [];
 
-    let stateStr = "UNKNOWN";
-    if (typeof stateValue === "string") {
-      stateStr = stateValue;
-    } else if (typeof stateValue === "object" && stateValue !== null && "current" in stateValue) {
-      const currentState = (stateValue as Record<string, unknown>).current;
-      stateStr = typeof currentState === "string" ? currentState : "UNKNOWN";
-    }
+  const taskRuns: TaskRun[] = rawArray.map((tr) => parseTaskRun(tr as Record<string, unknown>));
 
-    return {
-      id: typeof idValue === "string" ? idValue : idValue != null ? JSON.stringify(idValue) : "",
-      taskId:
-        typeof taskIdValue === "string"
-          ? taskIdValue
-          : taskIdValue != null
-            ? JSON.stringify(taskIdValue)
-            : "",
-      state: stateStr,
-      startDate:
-        tr.startDate instanceof Date
-          ? tr.startDate.toISOString()
-          : typeof tr.startDate === "string"
-            ? tr.startDate
-            : undefined,
-      endDate:
-        tr.endDate instanceof Date
-          ? tr.endDate.toISOString()
-          : typeof tr.endDate === "string"
-            ? tr.endDate
-            : undefined,
-      attempts: typeof tr.attempts === "number" ? tr.attempts : undefined,
-      outputs: tr.outputs as Record<string, unknown> | undefined,
-    };
-  });
   return {
     id: result.id,
     kestraExecId: result.kestraExecId,
@@ -108,8 +122,12 @@ export function toExecutionSummary(result: {
     triggeredBy: result.triggeredBy,
     createdAt:
       result.createdAt instanceof Date ? result.createdAt.toISOString() : String(result.createdAt),
-    endedAt: (result as Record<string, unknown>).endedAt
-      ? String((result as Record<string, unknown>).endedAt)
+    endedAt: result.endedAt
+      ? result.endedAt instanceof Date
+        ? result.endedAt.toISOString()
+        : String(result.endedAt)
       : undefined,
   };
 }
+
+export { inferEdgeType, toExecutionSummary };

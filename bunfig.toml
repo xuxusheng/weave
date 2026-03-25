@@ -5,5 +5,5 @@ peer = true
 "@voidzero-dev" = "https://registry.npmjs.org"
 
 [install.overrides]
-"vite" = "@voidzero-dev/vite-plus-core@0.1.13"
-"vitest" = "@voidzero-dev/vite-plus-test@0.1.13"
+"vite" = "@voidzero-dev/vite-plus-core@0.1.14"
+"vitest" = "@voidzero-dev/vite-plus-test@0.1.14"

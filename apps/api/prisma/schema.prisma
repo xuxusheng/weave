@@ -3,6 +3,13 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+generator zod {
+  provider     = "prisma-zod-generator"
+  output       = "../src/generated/zod"
+  isGenerateSelect = false
+  isGenerateInclude = false
+}
+
 datasource db {
   provider = "postgresql"
 }
@@ -28,9 +35,13 @@ model Workflow {
   flowId           String
   namespaceId      String
   description      String?
+  /// [WorkflowNode]
   nodes            Json     @default("[]")
+  /// [WorkflowEdge]
   edges            Json     @default("[]")
+  /// [WorkflowInput]
   inputs           Json     @default("[]")
+  /// [WorkflowVariable]
   variables        Json     @default("[]")
   disabled         Boolean  @default(false)
   publishedVersion Int      @default(0)
@@ -51,9 +62,13 @@ model Workflow {
 model WorkflowDraft {
   id         String   @id @default(cuid())
   workflowId String
+  /// [WorkflowNode]
   nodes      Json
+  /// [WorkflowEdge]
   edges      Json
+  /// [WorkflowInput]
   inputs     Json
+  /// [WorkflowVariable]
   variables  Json
   message    String?
   createdAt  DateTime @default(now())
@@ -69,9 +84,13 @@ model WorkflowRelease {
   workflowId  String
   version     Int
   name        String
+  /// [WorkflowNode]
   nodes       Json
+  /// [WorkflowEdge]
   edges       Json
+  /// [WorkflowInput]
   inputs      Json
+  /// [WorkflowVariable]
   variables   Json
   yaml        String
   publishedAt DateTime @default(now())
@@ -90,12 +109,18 @@ model WorkflowDraftExecution {
   id            String    @id @default(cuid())
   workflowId    String
   kestraExecId  String
+  /// [WorkflowNode]
   nodes         Json
+  /// [WorkflowEdge]
   edges         Json
+  /// [WorkflowInput]
   inputs        Json
+  /// [WorkflowVariable]
   variables     Json
+  /// [InputValues]
   inputValues   Json      @default("{}")
   state         String
+  /// [TaskRun]
   taskRuns      Json      @default("[]")
   triggeredBy   String    @default("manual")
   startedAt     DateTime?
@@ -114,8 +139,10 @@ model WorkflowExecution {
   workflowId    String
   releaseId     String
   kestraExecId  String
+  /// [InputValues]
   inputValues   Json              @default("{}")
   state         String
+  /// [TaskRun]
   taskRuns      Json              @default("[]")
   triggeredBy   String            @default("manual")
   startedAt     DateTime?
@@ -136,7 +163,9 @@ model WorkflowTrigger {
   workflowId    String
   name          String
   type          String
+  /// [TriggerConfig]
   config        Json
+  /// [InputValues]
   inputs        Json     @default("{}")
   kestraFlowId  String
   disabled      Boolean  @default(false)

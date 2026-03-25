@@ -1,0 +1,14 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowOrderByWithRelationInputObjectSchema as WorkflowOrderByWithRelationInputObjectSchema } from './objects/WorkflowOrderByWithRelationInput.schema';
+import { WorkflowWhereInputObjectSchema as WorkflowWhereInputObjectSchema } from './objects/WorkflowWhereInput.schema';
+import { WorkflowWhereUniqueInputObjectSchema as WorkflowWhereUniqueInputObjectSchema } from './objects/WorkflowWhereUniqueInput.schema';
+import { WorkflowCountAggregateInputObjectSchema as WorkflowCountAggregateInputObjectSchema } from './objects/WorkflowCountAggregateInput.schema';
+import { WorkflowMinAggregateInputObjectSchema as WorkflowMinAggregateInputObjectSchema } from './objects/WorkflowMinAggregateInput.schema';
+import { WorkflowMaxAggregateInputObjectSchema as WorkflowMaxAggregateInputObjectSchema } from './objects/WorkflowMaxAggregateInput.schema';
+import { WorkflowAvgAggregateInputObjectSchema as WorkflowAvgAggregateInputObjectSchema } from './objects/WorkflowAvgAggregateInput.schema';
+import { WorkflowSumAggregateInputObjectSchema as WorkflowSumAggregateInputObjectSchema } from './objects/WorkflowSumAggregateInput.schema';
+
+export const WorkflowAggregateSchema: z.ZodType<Prisma.WorkflowAggregateArgs> = z.object({ orderBy: z.union([WorkflowOrderByWithRelationInputObjectSchema, WorkflowOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowWhereInputObjectSchema.optional(), cursor: WorkflowWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowCountAggregateInputObjectSchema ]).optional(), _min: WorkflowMinAggregateInputObjectSchema.optional(), _max: WorkflowMaxAggregateInputObjectSchema.optional(), _avg: WorkflowAvgAggregateInputObjectSchema.optional(), _sum: WorkflowSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowAggregateArgs>;
+
+export const WorkflowAggregateZodSchema = z.object({ orderBy: z.union([WorkflowOrderByWithRelationInputObjectSchema, WorkflowOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowWhereInputObjectSchema.optional(), cursor: WorkflowWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowCountAggregateInputObjectSchema ]).optional(), _min: WorkflowMinAggregateInputObjectSchema.optional(), _max: WorkflowMaxAggregateInputObjectSchema.optional(), _avg: WorkflowAvgAggregateInputObjectSchema.optional(), _sum: WorkflowSumAggregateInputObjectSchema.optional() }).strict();

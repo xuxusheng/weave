@@ -1,0 +1,13 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowDraftWhereInputObjectSchema as WorkflowDraftWhereInputObjectSchema } from './objects/WorkflowDraftWhereInput.schema';
+import { WorkflowDraftOrderByWithAggregationInputObjectSchema as WorkflowDraftOrderByWithAggregationInputObjectSchema } from './objects/WorkflowDraftOrderByWithAggregationInput.schema';
+import { WorkflowDraftScalarWhereWithAggregatesInputObjectSchema as WorkflowDraftScalarWhereWithAggregatesInputObjectSchema } from './objects/WorkflowDraftScalarWhereWithAggregatesInput.schema';
+import { WorkflowDraftScalarFieldEnumSchema } from './enums/WorkflowDraftScalarFieldEnum.schema';
+import { WorkflowDraftCountAggregateInputObjectSchema as WorkflowDraftCountAggregateInputObjectSchema } from './objects/WorkflowDraftCountAggregateInput.schema';
+import { WorkflowDraftMinAggregateInputObjectSchema as WorkflowDraftMinAggregateInputObjectSchema } from './objects/WorkflowDraftMinAggregateInput.schema';
+import { WorkflowDraftMaxAggregateInputObjectSchema as WorkflowDraftMaxAggregateInputObjectSchema } from './objects/WorkflowDraftMaxAggregateInput.schema';
+
+export const WorkflowDraftGroupBySchema: z.ZodType<Prisma.WorkflowDraftGroupByArgs> = z.object({ where: WorkflowDraftWhereInputObjectSchema.optional(), orderBy: z.union([WorkflowDraftOrderByWithAggregationInputObjectSchema, WorkflowDraftOrderByWithAggregationInputObjectSchema.array()]).optional(), having: WorkflowDraftScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(WorkflowDraftScalarFieldEnumSchema), _count: z.union([ z.literal(true), WorkflowDraftCountAggregateInputObjectSchema ]).optional(), _min: WorkflowDraftMinAggregateInputObjectSchema.optional(), _max: WorkflowDraftMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowDraftGroupByArgs>;
+
+export const WorkflowDraftGroupByZodSchema = z.object({ where: WorkflowDraftWhereInputObjectSchema.optional(), orderBy: z.union([WorkflowDraftOrderByWithAggregationInputObjectSchema, WorkflowDraftOrderByWithAggregationInputObjectSchema.array()]).optional(), having: WorkflowDraftScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(WorkflowDraftScalarFieldEnumSchema), _count: z.union([ z.literal(true), WorkflowDraftCountAggregateInputObjectSchema ]).optional(), _min: WorkflowDraftMinAggregateInputObjectSchema.optional(), _max: WorkflowDraftMaxAggregateInputObjectSchema.optional() }).strict();

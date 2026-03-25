@@ -1,4 +1,5 @@
 import { memo, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import { getNodeColor } from "@/types/workflow";
@@ -84,12 +85,14 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
   if (d.isContainer) {
     return (
       <div
-        className={`relative px-4 py-3 rounded-2xl border-2 bg-white shadow-sm min-w-[220px] transition-all ${
+        className={cn(
+          "relative px-4 py-3 rounded-2xl border-2 bg-white shadow-sm min-w-[220px] transition-all",
           d.isDragOver
             ? "border-solid scale-[1.02] shadow-lg ring-2 ring-primary/30"
-            : "border-dashed"
-        } ${selected ? "shadow-lg" : "hover:shadow-md"}
-        ${execStyle?.pulse ? "animate-pulse" : ""}`}
+            : "border-dashed",
+          selected ? "shadow-lg" : "hover:shadow-md",
+          execStyle?.pulse ? "animate-pulse" : "",
+        )}
         style={{
           borderColor: d.isDragOver
             ? color
@@ -130,7 +133,7 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
             {d.collapsed ? "▶" : "▼"}
           </button>
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-foreground truncate">{shortType}</div>
+            <div className={cn("text-sm font-semibold truncate")}>{shortType}</div>
             <div className="text-xs text-muted-foreground truncate">{d.label || "未命名"}</div>
           </div>
         </div>
@@ -152,7 +155,10 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
         {!d.collapsed && (
           <div className="mt-2 pt-2 border-t border-dashed" style={{ borderColor: `${color}33` }}>
             <div
-              className={`text-xs transition-colors ${d.isDragOver ? "text-primary font-medium" : "text-muted-foreground/60"}`}
+              className={cn(
+                "text-xs transition-colors",
+                d.isDragOver ? "text-primary font-medium" : "text-muted-foreground/60",
+              )}
             >
               {d.isDragOver ? "松开以放入" : "拖入子节点"}
             </div>
@@ -195,9 +201,11 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
   // 普通节点样式
   return (
     <div
-      className={`relative px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[200px] transition-all ${
-        selected ? "shadow-md" : "hover:shadow-md"
-      } ${execStyle?.pulse ? "animate-pulse" : ""}`}
+      className={cn(
+        "relative px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[200px] transition-all",
+        selected ? "shadow-md" : "hover:shadow-md",
+        execStyle?.pulse ? "animate-pulse" : "",
+      )}
       style={{
         borderColor: execStyle ? execStyle.border : selected ? color : `${color}66`,
         borderLeftWidth: 4,

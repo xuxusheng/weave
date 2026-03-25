@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model WorkflowDraft
@@ -569,9 +569,21 @@ export type $WorkflowDraftPayload<ExtArgs extends runtime.Types.Extensions.Inter
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     workflowId: string
+    /**
+     * [WorkflowNode]
+     */
     nodes: runtime.JsonValue
+    /**
+     * [WorkflowEdge]
+     */
     edges: runtime.JsonValue
+    /**
+     * [WorkflowInput]
+     */
     inputs: runtime.JsonValue
+    /**
+     * [WorkflowVariable]
+     */
     variables: runtime.JsonValue
     message: string | null
     createdAt: Date

@@ -8,6 +8,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { ScrollText, ChevronRight, Inbox, Copy, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { fromKestraYaml } from "@/lib/yamlConverter";
 import { diffNodes } from "@/lib/diff";
@@ -176,21 +177,23 @@ export function VersionsPage() {
       <div className="flex border-b border-border shrink-0">
         <button
           onClick={() => setActiveTab("drafts")}
-          className={`px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+          className={cn(
+            "px-4 py-2.5 text-xs font-medium border-b-2 transition-colors",
             activeTab === "drafts"
               ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
         >
           草稿历史
         </button>
         <button
           onClick={() => setActiveTab("releases")}
-          className={`px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+          className={cn(
+            "px-4 py-2.5 text-xs font-medium border-b-2 transition-colors",
             activeTab === "releases"
               ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
         >
           发布版本
         </button>

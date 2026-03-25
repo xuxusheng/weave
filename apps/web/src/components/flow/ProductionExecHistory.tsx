@@ -23,6 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const STATE_ICONS: Record<string, React.ReactNode> = {
   CREATED: <Clock className="w-3.5 h-3.5 text-muted-foreground" />,
@@ -94,7 +95,9 @@ export function ProductionExecHistory({ workflowId, onClose }: ProductionExecHis
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             title="刷新"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${listQuery.isRefetching ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={cn("w-3.5 h-3.5", listQuery.isRefetching ? "animate-spin" : "")}
+            />
           </button>
           <button
             onClick={onClose}

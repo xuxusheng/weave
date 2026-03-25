@@ -1,0 +1,58 @@
+import * as z from 'zod';
+export const WorkflowDraftExecutionGroupByResultSchema = z.array(z.object({
+  id: z.string(),
+  workflowId: z.string(),
+  kestraExecId: z.string(),
+  nodes: z.unknown(),
+  edges: z.unknown(),
+  inputs: z.unknown(),
+  variables: z.unknown(),
+  inputValues: z.unknown(),
+  state: z.string(),
+  taskRuns: z.unknown(),
+  triggeredBy: z.string(),
+  startedAt: z.date(),
+  endedAt: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  _count: z.object({
+    id: z.number(),
+    workflowId: z.number(),
+    kestraExecId: z.number(),
+    nodes: z.number(),
+    edges: z.number(),
+    inputs: z.number(),
+    variables: z.number(),
+    inputValues: z.number(),
+    state: z.number(),
+    taskRuns: z.number(),
+    triggeredBy: z.number(),
+    startedAt: z.number(),
+    endedAt: z.number(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+    workflow: z.number()
+  }).optional(),
+  _min: z.object({
+    id: z.string().nullable(),
+    workflowId: z.string().nullable(),
+    kestraExecId: z.string().nullable(),
+    state: z.string().nullable(),
+    triggeredBy: z.string().nullable(),
+    startedAt: z.date().nullable(),
+    endedAt: z.date().nullable(),
+    createdAt: z.date().nullable(),
+    updatedAt: z.date().nullable()
+  }).nullable().optional(),
+  _max: z.object({
+    id: z.string().nullable(),
+    workflowId: z.string().nullable(),
+    kestraExecId: z.string().nullable(),
+    state: z.string().nullable(),
+    triggeredBy: z.string().nullable(),
+    startedAt: z.date().nullable(),
+    endedAt: z.date().nullable(),
+    createdAt: z.date().nullable(),
+    updatedAt: z.date().nullable()
+  }).nullable().optional()
+}));

@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   Clock,
   Webhook,
@@ -274,9 +275,10 @@ export function TriggerPanel({ workflowId, onCreate }: TriggerPanelProps) {
 
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <span
-                        className={`inline-block w-1.5 h-1.5 rounded-full ${
-                          item.disabled ? "bg-gray-400" : "bg-green-500"
-                        }`}
+                        className={cn(
+                          "inline-block w-1.5 h-1.5 rounded-full",
+                          item.disabled ? "bg-gray-400" : "bg-green-500",
+                        )}
                       />
                       <span className="text-xs text-muted-foreground">
                         {item.disabled ? "已禁用" : "已启用"}

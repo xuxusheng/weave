@@ -4,8 +4,11 @@
  * 右侧抽屉，按触发方式分组，支持状态/时间/触发方式筛选和排序
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
+import { useQueryState, parseAsString, parseAsArrayOf } from "nuqs";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import type { ExecutionSummary, TaskRun } from "@/stores/workflow";
 import {
   Clock,
@@ -105,22 +108,29 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
 
   const items = query.data?.items ?? [];
 
-  // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedStates, setSelectedStates] = useState<string[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>("all");
-  const [triggerFilter, setTriggerFilter] = useState<TriggerFilter>("all");
-  const [sortBy, setSortBy] = useState<SortBy>("time-desc");
+  const [selectedStates, setSelectedStates] = useQueryState(
+    "states",
+    parseAsArrayOf(parseAsString).withDefault([]),
+  );
+  const [timeRange, setTimeRange] = useQueryState("timeRange", parseAsString.withDefault("all"));
+  const [triggerFilter, setTriggerFilter] = useQueryState(
+    "trigger",
+    parseAsString.withDefault("all"),
+  );
+  const [sortBy, setSortBy] = useQueryState("sort", parseAsString.withDefault("time-desc"));
 
   const hasActiveFilter =
     selectedStates.length > 0 || timeRange !== "all" || triggerFilter !== "all";
 
   const filteredItems = useMemo(() => {
+    const timeRangeValue = timeRange as TimeRange;
+    const triggerFilterValue = triggerFilter as TriggerFilter;
     let result = items.filter(
       (i: { state: string; createdAt: Date | string; triggeredBy: string }) => {
         if (selectedStates.length > 0 && !selectedStates.includes(i.state)) return false;
-        if (!withinTimeRange(i.createdAt, timeRange)) return false;
-        if (!matchesTrigger(i.triggeredBy, triggerFilter)) return false;
+        if (!withinTimeRange(i.createdAt, timeRangeValue)) return false;
+        if (!matchesTrigger(i.triggeredBy, triggerFilterValue)) return false;
         return true;
       },
     );
@@ -145,15 +155,15 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
   }, [items, selectedStates, timeRange, triggerFilter, sortBy]);
 
   function toggleState(state: string) {
-    setSelectedStates((prev) =>
+    void setSelectedStates((prev) =>
       prev.includes(state) ? prev.filter((s) => s !== state) : [...prev, state],
     );
   }
 
   function clearFilters() {
-    setSelectedStates([]);
-    setTimeRange("all");
-    setTriggerFilter("all");
+    void setSelectedStates([]);
+    void setTimeRange("all");
+    void setTriggerFilter("all");
   }
 
   // Group filtered items by trigger type
@@ -161,11 +171,38 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
   const replays = filteredItems.filter((i: { triggeredBy: string }) =>
     i.triggeredBy.startsWith("replay:"),
   );
-  // schedule / webhook also included
   const scheduled = filteredItems.filter(
     (i: { triggeredBy: string }) =>
       i.triggeredBy.startsWith("schedule:") || i.triggeredBy.startsWith("webhook:"),
   );
+
+  const flatList = useMemo(() => {
+    type FlatItem =
+      | { type: "header"; title: string }
+      | { type: "item"; data: (typeof filteredItems)[number] };
+    const result: FlatItem[] = [];
+    if (manual.length > 0) {
+      result.push({ type: "header", title: "手动测试" });
+      for (const item of manual) result.push({ type: "item", data: item });
+    }
+    if (replays.length > 0) {
+      result.push({ type: "header", title: "Replay" });
+      for (const item of replays) result.push({ type: "item", data: item });
+    }
+    if (scheduled.length > 0) {
+      result.push({ type: "header", title: "已发布" });
+      for (const item of scheduled) result.push({ type: "item", data: item });
+    }
+    return result;
+  }, [manual, replays, scheduled]);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: flatList.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (i) => (flatList[i]?.type === "header" ? 28 : 56),
+    overscan: 5,
+  });
 
   return (
     <div className="w-72 md:w-80 h-full bg-card border-l border-border flex flex-col">
@@ -177,7 +214,10 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
         <div className="flex items-center gap-1">
           <button
             onClick={() => setFilterOpen((v) => !v)}
-            className={`p-1 rounded hover:bg-muted ${hasActiveFilter ? "text-primary" : "text-muted-foreground"}`}
+            className={cn(
+              "p-1 rounded hover:bg-muted",
+              hasActiveFilter ? "text-primary" : "text-muted-foreground",
+            )}
             title="筛选"
           >
             <Filter className="w-4 h-4" />
@@ -216,7 +256,7 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
               <div className="text-xs font-medium text-muted-foreground mb-1.5">时间范围</div>
               <Select
                 value={timeRange}
-                onValueChange={(v) => setTimeRange((v as TimeRange) ?? "all")}
+                onValueChange={(v) => void setTimeRange((v as TimeRange) ?? "all")}
               >
                 <SelectTrigger size="sm" className="w-full">
                   <SelectValue />
@@ -236,7 +276,7 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
               <div className="text-xs font-medium text-muted-foreground mb-1.5">触发方式</div>
               <Select
                 value={triggerFilter}
-                onValueChange={(v) => setTriggerFilter((v as TriggerFilter) ?? "all")}
+                onValueChange={(v) => void setTriggerFilter((v as TriggerFilter) ?? "all")}
               >
                 <SelectTrigger size="sm" className="w-full">
                   <SelectValue />
@@ -254,7 +294,10 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
             {/* Sort */}
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-1.5">排序</div>
-              <Select value={sortBy} onValueChange={(v) => setSortBy((v as SortBy) ?? "time-desc")}>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => void setSortBy((v as SortBy) ?? "time-desc")}
+              >
                 <SelectTrigger size="sm" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -287,7 +330,7 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
       </Collapsible>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={parentRef} className="flex-1 overflow-y-auto">
         {query.isLoading ? (
           <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
             加载中...
@@ -303,95 +346,104 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
             </p>
           </div>
         ) : (
-          <div className="p-2 space-y-4">
-            {manual.length > 0 && (
-              <GroupSection title="手动测试" items={manual} onSelect={onSelect} utils={utils} />
-            )}
-            {replays.length > 0 && (
-              <GroupSection title="Replay" items={replays} onSelect={onSelect} utils={utils} />
-            )}
-            {scheduled.length > 0 && (
-              <GroupSection title="已发布" items={scheduled} onSelect={onSelect} utils={utils} />
-            )}
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: "relative",
+              width: "100%",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((vItem) => {
+              const item = flatList[vItem.index];
+              if (!item) return null;
+              if (item.type === "header") {
+                return (
+                  <div
+                    key={vItem.key}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: `${vItem.size}px`,
+                      transform: `translateY(${vItem.start}px)`,
+                    }}
+                    className="px-2 pt-2"
+                  >
+                    <h4 className="text-xs font-medium text-muted-foreground">{item.title}</h4>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={vItem.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${vItem.size}px`,
+                    transform: `translateY(${vItem.start}px)`,
+                  }}
+                >
+                  <button
+                    onClick={async () => {
+                      try {
+                        const full = await utils.workflow.executionGet.fetch({
+                          executionId: item.data.id,
+                        });
+                        if (full && onSelect) {
+                          onSelect({
+                            id: full.id,
+                            kestraExecId: full.kestraExecId,
+                            state: full.state,
+                            taskRuns: (full.taskRuns ?? []) as unknown as TaskRun[],
+                            triggeredBy: full.triggeredBy,
+                            createdAt:
+                              full.createdAt instanceof Date
+                                ? full.createdAt.toISOString()
+                                : String(full.createdAt),
+                          });
+                          return;
+                        }
+                      } catch {}
+                      onSelect?.({
+                        id: item.data.id,
+                        kestraExecId: "",
+                        state: item.data.state,
+                        taskRuns: [],
+                        triggeredBy: item.data.triggeredBy,
+                        createdAt:
+                          item.data.createdAt instanceof Date
+                            ? item.data.createdAt.toISOString()
+                            : String(item.data.createdAt),
+                      });
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted/50 text-left"
+                  >
+                    <span className="text-sm">
+                      {STATE_ICONS[item.data.state] ?? (
+                        <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                      )}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-medium truncate">
+                          {item.data.id.slice(0, 12)}
+                        </span>
+                        <SourceTag triggeredBy={item.data.triggeredBy} />
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatTime(item.data.createdAt)}
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{item.data.state}</span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function GroupSection({
-  title,
-  items,
-  onSelect,
-  utils,
-}: {
-  title: string;
-  items: Array<{
-    id: string;
-    state: string;
-    triggeredBy: string;
-    createdAt: Date | string;
-  }>;
-  onSelect?: (execution: ExecutionSummary) => void;
-  utils: ReturnType<typeof trpc.useUtils>;
-}) {
-  return (
-    <div>
-      <h4 className="text-xs font-medium text-muted-foreground px-2 mb-1">{title}</h4>
-      <div className="space-y-0.5">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={async () => {
-              try {
-                const full = await utils.workflow.executionGet.fetch({ executionId: item.id });
-                if (full && onSelect) {
-                  onSelect({
-                    id: full.id,
-                    kestraExecId: full.kestraExecId,
-                    state: full.state,
-                    taskRuns: (full.taskRuns ?? []) as unknown as TaskRun[],
-                    triggeredBy: full.triggeredBy,
-                    createdAt:
-                      full.createdAt instanceof Date
-                        ? full.createdAt.toISOString()
-                        : String(full.createdAt),
-                  });
-                  return;
-                }
-              } catch {
-                // fallback: use summary data
-              }
-              onSelect?.({
-                id: item.id,
-                kestraExecId: "",
-                state: item.state,
-                taskRuns: [],
-                triggeredBy: item.triggeredBy,
-                createdAt:
-                  item.createdAt instanceof Date
-                    ? item.createdAt.toISOString()
-                    : String(item.createdAt),
-              });
-            }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted/50 text-left"
-          >
-            <span className="text-sm">
-              {STATE_ICONS[item.state] ?? (
-                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
-              )}
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-medium truncate">{item.id.slice(0, 12)}</span>
-                <SourceTag triggeredBy={item.triggeredBy} />
-              </div>
-              <div className="text-xs text-muted-foreground">{formatTime(item.createdAt)}</div>
-            </div>
-            <span className="text-xs text-muted-foreground">{item.state}</span>
-          </button>
-        ))}
       </div>
     </div>
   );

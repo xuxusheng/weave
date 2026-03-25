@@ -209,9 +209,16 @@ export function setupYamlValidation(
     monaco.editor.setModelMarkers(model, "kestra-business", markers);
   };
 
-  // Run validation on content change
+  // Run validation on content change with manual debounce (300ms)
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const debouncedValidate = () => {
+    if (debounceTimer !== undefined) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(validate, 300);
+  };
   const disposable = model.onDidChangeContent(() => {
-    setTimeout(validate, 300); // debounce
+    debouncedValidate();
   });
 
   // Initial validation

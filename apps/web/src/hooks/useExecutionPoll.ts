@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { useWorkflowStore } from "@/stores/workflow";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { toExecutionSummary, isTerminalState } from "@/lib/apiTransforms";
+import { toExecutionSummary } from "@/lib/apiTransforms";
+import { isTerminalState } from "@weave/shared";
 
 export function useKestraHealthCheck() {
   const utils = trpc.useUtils();

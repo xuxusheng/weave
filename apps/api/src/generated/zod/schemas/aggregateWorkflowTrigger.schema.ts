@@ -1,0 +1,12 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowTriggerOrderByWithRelationInputObjectSchema as WorkflowTriggerOrderByWithRelationInputObjectSchema } from './objects/WorkflowTriggerOrderByWithRelationInput.schema';
+import { WorkflowTriggerWhereInputObjectSchema as WorkflowTriggerWhereInputObjectSchema } from './objects/WorkflowTriggerWhereInput.schema';
+import { WorkflowTriggerWhereUniqueInputObjectSchema as WorkflowTriggerWhereUniqueInputObjectSchema } from './objects/WorkflowTriggerWhereUniqueInput.schema';
+import { WorkflowTriggerCountAggregateInputObjectSchema as WorkflowTriggerCountAggregateInputObjectSchema } from './objects/WorkflowTriggerCountAggregateInput.schema';
+import { WorkflowTriggerMinAggregateInputObjectSchema as WorkflowTriggerMinAggregateInputObjectSchema } from './objects/WorkflowTriggerMinAggregateInput.schema';
+import { WorkflowTriggerMaxAggregateInputObjectSchema as WorkflowTriggerMaxAggregateInputObjectSchema } from './objects/WorkflowTriggerMaxAggregateInput.schema';
+
+export const WorkflowTriggerAggregateSchema: z.ZodType<Prisma.WorkflowTriggerAggregateArgs> = z.object({ orderBy: z.union([WorkflowTriggerOrderByWithRelationInputObjectSchema, WorkflowTriggerOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowTriggerWhereInputObjectSchema.optional(), cursor: WorkflowTriggerWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional(), _min: WorkflowTriggerMinAggregateInputObjectSchema.optional(), _max: WorkflowTriggerMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowTriggerAggregateArgs>;
+
+export const WorkflowTriggerAggregateZodSchema = z.object({ orderBy: z.union([WorkflowTriggerOrderByWithRelationInputObjectSchema, WorkflowTriggerOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowTriggerWhereInputObjectSchema.optional(), cursor: WorkflowTriggerWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional(), _min: WorkflowTriggerMinAggregateInputObjectSchema.optional(), _max: WorkflowTriggerMaxAggregateInputObjectSchema.optional() }).strict();

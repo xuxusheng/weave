@@ -4,7 +4,15 @@ import { parse as parseYaml } from "yaml"
 import { Prisma } from "../generated/prisma/client.js"
 import { t } from "../trpc.js"
 import { prisma } from "../db.js"
-import { createWorkflowSchema, updateWorkflowSchema } from "../types.js"
+import {
+  createWorkflowSchema,
+  updateWorkflowSchema,
+  workflowNodeSchema,
+  workflowEdgeSchema,
+  workflowInputSchema,
+  workflowVariableSchema,
+  triggerConfigSchema,
+} from "../types.js"
 import { buildTriggerFlowYaml } from "../lib/trigger-yaml.js"
 import { encrypt, decrypt } from "../lib/crypto.js"
 import { nameToSlug } from "@weave/shared/slug"
@@ -264,10 +272,10 @@ export const workflowRouter = t.router({
       z.object({
         workflowId: z.string(),
         message: z.string().optional(),
-        nodes: z.any().optional(),
-        edges: z.any().optional(),
-        inputs: z.any().optional(),
-        variables: z.any().optional(),
+        nodes: z.array(workflowNodeSchema).optional(),
+        edges: z.array(workflowEdgeSchema).optional(),
+        inputs: z.array(workflowInputSchema).optional(),
+        variables: z.array(workflowVariableSchema).optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -1042,7 +1050,7 @@ export const workflowRouter = t.router({
         workflowId: z.string(),
         name: z.string().min(1).max(100),
         type: z.enum(["schedule", "webhook"]),
-        config: z.record(z.string(), z.unknown()),
+        config: triggerConfigSchema,
         inputs: z.record(z.string(), z.string()).optional(),
         releaseId: z.string().optional(),
       }),
@@ -1065,7 +1073,10 @@ export const workflowRouter = t.router({
         })
       }
 
-      if (input.type === "webhook" && !input.config.secret) {
+      if (
+        input.type === "webhook" &&
+        (!("secret" in input.config) || !input.config.secret)
+      ) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Webhook secret is required" })
       }
 
@@ -1188,7 +1199,7 @@ export const workflowRouter = t.router({
       z.object({
         id: z.string(),
         name: z.string().min(1).max(100).optional(),
-        config: z.record(z.string(), z.unknown()).optional(),
+        config: triggerConfigSchema.optional(),
         inputs: z.record(z.string(), z.string()).optional(),
         disabled: z.boolean().optional(),
       }),
@@ -1225,7 +1236,9 @@ export const workflowRouter = t.router({
             const { getKestraClient } = await import("../lib/kestra-client.js")
             const client = getKestraClient()
             await client.upsertFlow(trigger.workflow.namespace.kestraNamespace, trigger.kestraFlowId, yaml)
-          } catch { /* best-effort */ }
+          } catch (e) {
+            console.warn("Kestra trigger sync failed (best-effort):", e)
+          }
         }
       }
 
@@ -1251,7 +1264,9 @@ export const workflowRouter = t.router({
         const { getKestraClient } = await import("../lib/kestra-client.js")
         const client = getKestraClient()
         await client.deleteFlow(trigger.workflow.namespace.kestraNamespace, trigger.kestraFlowId)
-      } catch { /* best-effort */ }
+      } catch (e) {
+        console.warn("Kestra trigger delete failed (best-effort):", e)
+      }
 
       return prisma.workflowTrigger.delete({ where: { id: input.id } })
     }),
@@ -1282,7 +1297,9 @@ export const workflowRouter = t.router({
           const { getKestraClient } = await import("../lib/kestra-client.js")
           const client = getKestraClient()
           await client.deleteFlow(ns, trigger.kestraFlowId)
-        } catch { /* best-effort */ }
+        } catch (e) {
+          console.warn("Kestra trigger disable failed (best-effort):", e)
+        }
       } else {
         // Re-generate YAML and push (hard fail)
         if (trigger.workflow.releases.length === 0) {
@@ -1366,7 +1383,9 @@ export const workflowRouter = t.router({
           const vars = Object.fromEntries(allVars.map((v) => [v.key, v.value]))
           await client.request("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
         }
-      } catch { /* best-effort */ }
+      } catch (e) {
+        console.warn("Kestra variable sync failed (best-effort):", e)
+      }
 
       return variable
     }),
@@ -1399,7 +1418,9 @@ export const workflowRouter = t.router({
           const vars = Object.fromEntries(allVars.map((v) => [v.key, v.value]))
           await client.request("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
         }
-      } catch { /* best-effort */ }
+      } catch (e) {
+        console.warn("Kestra variable update sync failed (best-effort):", e)
+      }
 
       return updated
     }),
@@ -1420,7 +1441,9 @@ export const workflowRouter = t.router({
         if (ns) {
           await client.request("DELETE", `/api/v1/variables/${ns.kestraNamespace}/${variable.key}`)
         }
-      } catch { /* best-effort */ }
+      } catch (e) {
+        console.warn("Kestra variable delete sync failed (best-effort):", e)
+      }
 
       return { success: true }
     }),

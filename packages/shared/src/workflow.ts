@@ -180,3 +180,16 @@ export const EDGE_STYLES: Record<EdgeType, { stroke: string; strokeWidth: number
   errors:      { stroke: "#ef4444", strokeWidth: 2, strokeDasharray: "5,5" },
   finally:     { stroke: "#9ca3af", strokeWidth: 2, strokeDasharray: "5,5" },
 }
+
+export const TERMINAL_STATES = new Set([
+  "SUCCESS",
+  "WARNING",
+  "FAILED",
+  "KILLED",
+  "CANCELLED",
+  "RETRIED",
+])
+
+export function isTerminalState(state: string): boolean {
+  return TERMINAL_STATES.has(state)
+}

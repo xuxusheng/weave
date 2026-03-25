@@ -37,18 +37,8 @@ export interface KestraConfig {
   tenant: string
 }
 
-const TERMINAL_STATES = new Set([
-  "SUCCESS",
-  "WARNING",
-  "FAILED",
-  "KILLED",
-  "CANCELLED",
-  "RETRIED",
-])
-
-export function isTerminalState(state: string): boolean {
-  return TERMINAL_STATES.has(state)
-}
+import { isTerminalState } from "@weave/shared"
+export { isTerminalState }
 
 export class KestraClient {
   healthy = false

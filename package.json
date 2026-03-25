@@ -13,6 +13,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@react-scan/vite-plugin-react-scan": "^0.2.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "vite-plus": "0.1.14"

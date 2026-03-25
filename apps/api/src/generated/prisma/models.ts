@@ -8,13 +8,13 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Namespace.js'
-export type * from './models/Workflow.js'
-export type * from './models/WorkflowDraft.js'
-export type * from './models/WorkflowRelease.js'
-export type * from './models/WorkflowDraftExecution.js'
-export type * from './models/WorkflowExecution.js'
-export type * from './models/WorkflowTrigger.js'
-export type * from './models/Variable.js'
-export type * from './models/Secret.js'
-export type * from './commonInputTypes.js'
+export type * from './models/Namespace'
+export type * from './models/Workflow'
+export type * from './models/WorkflowDraft'
+export type * from './models/WorkflowRelease'
+export type * from './models/WorkflowDraftExecution'
+export type * from './models/WorkflowExecution'
+export type * from './models/WorkflowTrigger'
+export type * from './models/Variable'
+export type * from './models/Secret'
+export type * from './commonInputTypes'

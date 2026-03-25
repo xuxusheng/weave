@@ -1,0 +1,10 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowTriggerOrderByWithRelationInputObjectSchema as WorkflowTriggerOrderByWithRelationInputObjectSchema } from './objects/WorkflowTriggerOrderByWithRelationInput.schema';
+import { WorkflowTriggerWhereInputObjectSchema as WorkflowTriggerWhereInputObjectSchema } from './objects/WorkflowTriggerWhereInput.schema';
+import { WorkflowTriggerWhereUniqueInputObjectSchema as WorkflowTriggerWhereUniqueInputObjectSchema } from './objects/WorkflowTriggerWhereUniqueInput.schema';
+import { WorkflowTriggerCountAggregateInputObjectSchema as WorkflowTriggerCountAggregateInputObjectSchema } from './objects/WorkflowTriggerCountAggregateInput.schema';
+
+export const WorkflowTriggerCountSchema: z.ZodType<Prisma.WorkflowTriggerCountArgs> = z.object({ orderBy: z.union([WorkflowTriggerOrderByWithRelationInputObjectSchema, WorkflowTriggerOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowTriggerWhereInputObjectSchema.optional(), cursor: WorkflowTriggerWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowTriggerCountArgs>;
+
+export const WorkflowTriggerCountZodSchema = z.object({ orderBy: z.union([WorkflowTriggerOrderByWithRelationInputObjectSchema, WorkflowTriggerOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowTriggerWhereInputObjectSchema.optional(), cursor: WorkflowTriggerWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional() }).strict();

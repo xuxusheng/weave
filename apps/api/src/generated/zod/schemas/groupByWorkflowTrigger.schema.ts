@@ -1,0 +1,13 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowTriggerWhereInputObjectSchema as WorkflowTriggerWhereInputObjectSchema } from './objects/WorkflowTriggerWhereInput.schema';
+import { WorkflowTriggerOrderByWithAggregationInputObjectSchema as WorkflowTriggerOrderByWithAggregationInputObjectSchema } from './objects/WorkflowTriggerOrderByWithAggregationInput.schema';
+import { WorkflowTriggerScalarWhereWithAggregatesInputObjectSchema as WorkflowTriggerScalarWhereWithAggregatesInputObjectSchema } from './objects/WorkflowTriggerScalarWhereWithAggregatesInput.schema';
+import { WorkflowTriggerScalarFieldEnumSchema } from './enums/WorkflowTriggerScalarFieldEnum.schema';
+import { WorkflowTriggerCountAggregateInputObjectSchema as WorkflowTriggerCountAggregateInputObjectSchema } from './objects/WorkflowTriggerCountAggregateInput.schema';
+import { WorkflowTriggerMinAggregateInputObjectSchema as WorkflowTriggerMinAggregateInputObjectSchema } from './objects/WorkflowTriggerMinAggregateInput.schema';
+import { WorkflowTriggerMaxAggregateInputObjectSchema as WorkflowTriggerMaxAggregateInputObjectSchema } from './objects/WorkflowTriggerMaxAggregateInput.schema';
+
+export const WorkflowTriggerGroupBySchema: z.ZodType<Prisma.WorkflowTriggerGroupByArgs> = z.object({ where: WorkflowTriggerWhereInputObjectSchema.optional(), orderBy: z.union([WorkflowTriggerOrderByWithAggregationInputObjectSchema, WorkflowTriggerOrderByWithAggregationInputObjectSchema.array()]).optional(), having: WorkflowTriggerScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(WorkflowTriggerScalarFieldEnumSchema), _count: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional(), _min: WorkflowTriggerMinAggregateInputObjectSchema.optional(), _max: WorkflowTriggerMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowTriggerGroupByArgs>;
+
+export const WorkflowTriggerGroupByZodSchema = z.object({ where: WorkflowTriggerWhereInputObjectSchema.optional(), orderBy: z.union([WorkflowTriggerOrderByWithAggregationInputObjectSchema, WorkflowTriggerOrderByWithAggregationInputObjectSchema.array()]).optional(), having: WorkflowTriggerScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(WorkflowTriggerScalarFieldEnumSchema), _count: z.union([ z.literal(true), WorkflowTriggerCountAggregateInputObjectSchema ]).optional(), _min: WorkflowTriggerMinAggregateInputObjectSchema.optional(), _max: WorkflowTriggerMaxAggregateInputObjectSchema.optional() }).strict();

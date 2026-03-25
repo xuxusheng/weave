@@ -7,6 +7,7 @@ import {
   type PluginCategory,
 } from "@/types/workflow";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 const CATEGORY_LABELS: Record<PluginCategory, string> = {
@@ -202,11 +203,12 @@ export function NodeCreatePanel({ isOpen, onToggle }: NodeCreatePanelProps) {
           <button
             key={tag.key}
             onClick={() => setActiveTag(tag.key)}
-            className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+            className={cn(
+              "px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors",
               activeTag === tag.key
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
+                : "bg-muted text-muted-foreground hover:bg-muted/80",
+            )}
           >
             {tag.label}
           </button>
@@ -253,7 +255,10 @@ export function NodeCreatePanel({ isOpen, onToggle }: NodeCreatePanelProps) {
                 />
                 {CATEGORY_LABELS[cat as PluginCategory] ?? cat}
                 <ChevronRight
-                  className={`ml-auto w-3 h-3 transition-transform ${isCollapsed ? "" : "rotate-90"}`}
+                  className={cn(
+                    "ml-auto w-3 h-3 transition-transform",
+                    isCollapsed ? "" : "rotate-90",
+                  )}
                 />
               </CollapsibleTrigger>
 

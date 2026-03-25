@@ -4,6 +4,7 @@
  */
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { useParams, Link } from "@tanstack/react-router";
 import { History, ChevronRight } from "lucide-react";
 import { ExecutionHistory } from "@/components/flow/ExecutionHistory";
@@ -44,21 +45,23 @@ export function ExecutionPage() {
       <div className="flex border-b border-border shrink-0">
         <button
           onClick={() => setActiveTab("draft")}
-          className={`px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+          className={cn(
+            "px-4 py-2.5 text-xs font-medium border-b-2 transition-colors",
             activeTab === "draft"
               ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
         >
           草稿执行
         </button>
         <button
           onClick={() => setActiveTab("production")}
-          className={`px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+          className={cn(
+            "px-4 py-2.5 text-xs font-medium border-b-2 transition-colors",
             activeTab === "production"
               ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
         >
           版本执行
         </button>

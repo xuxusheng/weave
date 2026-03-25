@@ -1,5 +1,12 @@
 import type { WorkflowNode } from "@/types/workflow";
-import { compare, type Operation } from "fast-json-patch";
+import { diff, type UltraPatchTypes } from "ultrapatch";
+
+type Operation = {
+  op: "add" | "remove" | "replace" | "move" | "copy" | "test";
+  path: string;
+  value?: UltraPatchTypes.Diffable;
+  from?: string;
+};
 
 export interface NodeDiffResult {
   added: WorkflowNode[];
@@ -35,7 +42,10 @@ export function diffNodes(oldNodes: WorkflowNode[], newNodes: WorkflowNode[]): N
     const newNode = newMap.get(id);
     if (!newNode) continue;
 
-    const patches = compare(oldNode, newNode);
+    const patches = diff(
+      oldNode as unknown as UltraPatchTypes.Diffable,
+      newNode as unknown as UltraPatchTypes.Diffable,
+    );
     if (patches.length > 0) {
       modified.push({ oldNode, newNode, patches });
     }

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { FileText, Copy, Save, Plus, Minus, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import YAML from "yaml";
+import { cn } from "@/lib/utils";
 import { setupMonacoWorker } from "@/lib/monaco-worker";
 
 interface KestraYamlPanelProps {
@@ -239,17 +240,19 @@ export function KestraYamlPanel({
             <div className="flex rounded-md border border-border overflow-hidden text-xs">
               <button
                 onClick={() => handleSwitchMode("preview")}
-                className={`px-3 py-1.5 transition-colors ${
-                  mode === "preview" ? "bg-indigo-500 text-white" : "hover:bg-muted"
-                }`}
+                className={cn(
+                  "px-3 py-1.5 transition-colors",
+                  mode === "preview" ? "bg-indigo-500 text-white" : "hover:bg-muted",
+                )}
               >
                 预览
               </button>
               <button
                 onClick={() => handleSwitchMode("import")}
-                className={`px-3 py-1.5 transition-colors ${
-                  mode === "import" ? "bg-indigo-500 text-white" : "hover:bg-muted"
-                }`}
+                className={cn(
+                  "px-3 py-1.5 transition-colors",
+                  mode === "import" ? "bg-indigo-500 text-white" : "hover:bg-muted",
+                )}
               >
                 导入
               </button>

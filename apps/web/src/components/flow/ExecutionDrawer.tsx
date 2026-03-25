@@ -23,6 +23,8 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
+import { formatExecutionDuration } from "@/lib/date-utils";
 import {
   Select,
   SelectContent,
@@ -103,7 +105,10 @@ export function ExecutionDrawer({ onClose, onReplay }: ExecutionDrawerProps) {
           <div className="flex items-center gap-3">
             <DrawerTitle>执行详情</DrawerTitle>
             <span
-              className={`text-xs font-medium px-2 py-0.5 rounded ${STATE_COLORS[currentExecution.state] ?? "text-muted-foreground"}`}
+              className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded",
+                STATE_COLORS[currentExecution.state] ?? "text-muted-foreground",
+              )}
             >
               {STATE_ICONS[currentExecution.state] ?? (
                 <HelpCircle className="w-4 h-4 text-muted-foreground" />
@@ -131,11 +136,12 @@ export function ExecutionDrawer({ onClose, onReplay }: ExecutionDrawerProps) {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
+              className={cn(
+                "px-4 py-2 text-xs font-medium border-b-2 transition-colors",
                 tab === t
                   ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
             >
               {t === "overview" ? "概览" : t === "tasks" ? "任务列表" : "日志"}
             </button>
@@ -238,10 +244,10 @@ function TasksTab({
             {STATE_ICONS[tr.state] ?? <HelpCircle className="w-4 h-4 text-muted-foreground" />}
           </span>
           <span className="text-sm font-medium truncate flex-1">{tr.taskId}</span>
-          <span className={`text-xs ${STATE_COLORS[tr.state] ?? ""}`}>{tr.state}</span>
+          <span className={cn("text-xs", STATE_COLORS[tr.state] ?? "")}>{tr.state}</span>
           <span className="text-xs text-muted-foreground w-14 text-right shrink-0">
             {tr.endDate && tr.startDate
-              ? `${((new Date(tr.endDate).getTime() - new Date(tr.startDate).getTime()) / 1000).toFixed(1)}s`
+              ? formatExecutionDuration(tr.startDate, tr.endDate)
               : tr.state === "RUNNING"
                 ? "..."
                 : "—"}
@@ -302,7 +308,7 @@ function LogsTab({ kestraExecId }: { kestraExecId: string }) {
         {logs.map((log, i) => (
           <div
             key={`${log.timestamp}-${log.level}-${i}`}
-            className={`flex gap-2 ${levelColor(log.level)}`}
+            className={cn("flex gap-2", levelColor(log.level))}
           >
             <span className="text-muted-foreground shrink-0">
               {log.timestamp?.slice(11, 19) ?? ""}

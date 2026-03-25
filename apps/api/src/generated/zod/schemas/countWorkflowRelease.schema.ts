@@ -1,0 +1,10 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowReleaseOrderByWithRelationInputObjectSchema as WorkflowReleaseOrderByWithRelationInputObjectSchema } from './objects/WorkflowReleaseOrderByWithRelationInput.schema';
+import { WorkflowReleaseWhereInputObjectSchema as WorkflowReleaseWhereInputObjectSchema } from './objects/WorkflowReleaseWhereInput.schema';
+import { WorkflowReleaseWhereUniqueInputObjectSchema as WorkflowReleaseWhereUniqueInputObjectSchema } from './objects/WorkflowReleaseWhereUniqueInput.schema';
+import { WorkflowReleaseCountAggregateInputObjectSchema as WorkflowReleaseCountAggregateInputObjectSchema } from './objects/WorkflowReleaseCountAggregateInput.schema';
+
+export const WorkflowReleaseCountSchema: z.ZodType<Prisma.WorkflowReleaseCountArgs> = z.object({ orderBy: z.union([WorkflowReleaseOrderByWithRelationInputObjectSchema, WorkflowReleaseOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowReleaseWhereInputObjectSchema.optional(), cursor: WorkflowReleaseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), WorkflowReleaseCountAggregateInputObjectSchema ]).optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowReleaseCountArgs>;
+
+export const WorkflowReleaseCountZodSchema = z.object({ orderBy: z.union([WorkflowReleaseOrderByWithRelationInputObjectSchema, WorkflowReleaseOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowReleaseWhereInputObjectSchema.optional(), cursor: WorkflowReleaseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), WorkflowReleaseCountAggregateInputObjectSchema ]).optional() }).strict();

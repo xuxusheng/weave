@@ -3,7 +3,10 @@
  * 支持 Schedule / Webhook 两种类型
  */
 
-import { useState, useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Zap, RefreshCw } from "lucide-react";
@@ -26,6 +29,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const triggerFormSchema = z.object({
+  name: z.string().min(1, "请输入触发器名称"),
+  type: z.enum(["schedule", "webhook"]),
+  cron: z.string().optional(),
+  timezone: z.string().optional(),
+  webhookSecret: z.string().optional(),
+  selectedReleaseId: z.string().min(1, "请选择一个版本"),
+});
+
+type TriggerFormData = z.infer<typeof triggerFormSchema>;
+
 interface TriggerCreateFormProps {
   workflowId: string;
   releases: { id: string; version: number; name: string }[];
@@ -39,12 +53,26 @@ export function TriggerCreateForm({
   onClose,
   onCreated,
 }: TriggerCreateFormProps) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<"schedule" | "webhook">("schedule");
-  const [cron, setCron] = useState("0 9 * * *");
-  const [timezone, setTimezone] = useState("Asia/Shanghai");
-  const [webhookSecret, setWebhookSecret] = useState(() => crypto.randomUUID());
-  const [selectedReleaseId, setSelectedReleaseId] = useState(releases[0]?.id ?? "");
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<TriggerFormData>({
+    resolver: zodResolver(triggerFormSchema),
+    defaultValues: {
+      name: "",
+      type: "schedule",
+      cron: "0 9 * * *",
+      timezone: "Asia/Shanghai",
+      webhookSecret: crypto.randomUUID(),
+      selectedReleaseId: releases[0]?.id ?? "",
+    },
+  });
+
+  const type = watch("type");
+  const webhookSecret = watch("webhookSecret");
 
   const createTrigger = trpc.workflow.triggerCreate.useMutation({
     onSuccess: () => {
@@ -58,34 +86,35 @@ export function TriggerCreateForm({
   });
 
   const regenerateSecret = useCallback(() => {
-    setWebhookSecret(crypto.randomUUID());
-  }, []);
+    setValue("webhookSecret", crypto.randomUUID());
+  }, [setValue]);
 
-  const handleSubmit = useCallback(() => {
-    if (!name.trim()) {
-      toast.error("请输入触发器名称");
-      return;
-    }
-    if (type === "schedule" && !cron.trim()) {
-      toast.error("请输入 Cron 表达式");
-      return;
-    }
-    if (!selectedReleaseId) {
-      toast.error("请选择一个版本");
-      return;
-    }
+  const onSubmit = useCallback(
+    (data: TriggerFormData) => {
+      const config =
+        data.type === "schedule"
+          ? ({
+              cron: (data.cron ?? "").trim(),
+              timezone: data.timezone ?? "Asia/Shanghai",
+            } as const)
+          : ({ secret: data.webhookSecret ?? crypto.randomUUID() } as const);
 
-    const config: Record<string, unknown> =
-      type === "schedule" ? { cron: cron.trim(), timezone } : { secret: webhookSecret };
+      createTrigger.mutate({
+        workflowId,
+        name: data.name.trim(),
+        type: data.type,
+        config,
+        releaseId: data.selectedReleaseId,
+      });
+    },
+    [workflowId, createTrigger],
+  );
 
-    createTrigger.mutate({
-      workflowId,
-      name: name.trim(),
-      type,
-      config,
-      releaseId: selectedReleaseId,
-    });
-  }, [name, type, cron, timezone, webhookSecret, selectedReleaseId, workflowId, createTrigger]);
+  useEffect(() => {
+    if (errors.name) toast.error(errors.name.message);
+    if (errors.selectedReleaseId) toast.error(errors.selectedReleaseId.message);
+    if (errors.cron) toast.error(errors.cron.message);
+  }, [errors]);
 
   return (
     <Dialog
@@ -102,24 +131,17 @@ export function TriggerCreateForm({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Body */}
-        <div className="space-y-4">
-          {/* Name */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label className="mb-1.5">触发器名称</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="每日定时触发"
-            />
+            <Input {...register("name")} placeholder="每日定时触发" />
           </div>
 
-          {/* Type toggle */}
           <div>
             <Label className="mb-1.5">类型</Label>
             <RadioGroup
               value={type}
-              onValueChange={(v) => setType(v as "schedule" | "webhook")}
+              onValueChange={(v) => setValue("type", v as "schedule" | "webhook")}
               className="flex gap-4"
             >
               <Label className="flex items-center gap-2 cursor-pointer">
@@ -133,30 +155,20 @@ export function TriggerCreateForm({
             </RadioGroup>
           </div>
 
-          {/* Schedule config */}
           {type === "schedule" && (
             <div className="space-y-3 border-t border-border pt-3">
               <p className="text-xs font-medium text-muted-foreground">Schedule 配置</p>
               <div>
                 <Label className="mb-1.5">Cron</Label>
-                <Input
-                  value={cron}
-                  onChange={(e) => setCron(e.target.value)}
-                  placeholder="0 9 * * *"
-                />
+                <Input {...register("cron")} placeholder="0 9 * * *" />
               </div>
               <div>
                 <Label className="mb-1.5">时区</Label>
-                <Input
-                  value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
-                  placeholder="Asia/Shanghai"
-                />
+                <Input {...register("timezone")} placeholder="Asia/Shanghai" />
               </div>
             </div>
           )}
 
-          {/* Webhook config */}
           {type === "webhook" && (
             <div className="space-y-3 border-t border-border pt-3">
               <p className="text-xs font-medium text-muted-foreground">Webhook 配置</p>
@@ -164,7 +176,13 @@ export function TriggerCreateForm({
                 <Label className="mb-1.5">Secret</Label>
                 <div className="flex gap-2">
                   <Input value={webhookSecret} readOnly className="font-mono bg-muted" />
-                  <Button variant="outline" size="icon" onClick={regenerateSecret} title="重新生成">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={regenerateSecret}
+                    title="重新生成"
+                  >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
                 </div>
@@ -172,13 +190,12 @@ export function TriggerCreateForm({
             </div>
           )}
 
-          {/* Release selector */}
           <div>
             <Label className="mb-1.5">基于版本</Label>
             <Select
-              value={selectedReleaseId}
+              value={watch("selectedReleaseId")}
               onValueChange={(v) => {
-                if (v) setSelectedReleaseId(v);
+                if (v) setValue("selectedReleaseId", v);
               }}
             >
               <SelectTrigger className="w-full">
@@ -193,16 +210,16 @@ export function TriggerCreateForm({
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            取消
-          </Button>
-          <Button onClick={handleSubmit} disabled={createTrigger.isPending}>
-            {createTrigger.isPending ? "创建中..." : "创建"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              取消
+            </Button>
+            <Button type="submit" disabled={createTrigger.isPending}>
+              {createTrigger.isPending ? "创建中..." : "创建"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

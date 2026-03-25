@@ -7,6 +7,7 @@ import {
   type PluginCategory,
 } from "@/types/workflow";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_LABELS: Record<PluginCategory, string> = {
   flow: "控制流",
@@ -113,11 +114,12 @@ export function MobileNodePanel() {
           <button
             key={tag.key}
             onClick={() => setActiveTag(tag.key)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            className={cn(
+              "px-3 py-1 rounded-full text-xs font-medium transition-colors",
               activeTag === tag.key
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
+                : "bg-muted text-muted-foreground hover:bg-muted/80",
+            )}
           >
             {tag.label}
           </button>

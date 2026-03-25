@@ -1,14 +1,15 @@
 import { useCallback, useRef, useMemo, useEffect, memo, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "@tanstack/react-router";
+import { Panel, Group, Separator } from "react-resizable-panels";
 import type { RunningSnapshot } from "@/stores/workflow";
 import {
-  isTerminalState,
   toExecutionSummary,
   inferEdgeType,
   fromApiNode,
   fromApiEdge,
   fromApiInput,
 } from "@/lib/apiTransforms";
+import { isTerminalState } from "@weave/shared";
 import { toCanvasNodes, toCanvasEdges, syncPositions } from "@/lib/canvasTransforms";
 import { parseYamlToNodeFields, yamlFromSpec } from "@/lib/yamlNodeUtils";
 import {
@@ -37,6 +38,7 @@ const KestraYamlPanel = lazy(() =>
   import("@/components/flow/KestraYamlPanel").then((mod) => ({ default: mod.KestraYamlPanel })),
 );
 import { DraftHistory } from "@/components/flow/DraftHistory";
+import { cn } from "@/lib/utils";
 import { ReleaseHistory } from "@/components/flow/ReleaseHistory";
 import { PublishDialog } from "@/components/flow/PublishDialog";
 import { ExecutionDrawer } from "@/components/flow/ExecutionDrawer";
@@ -628,8 +630,8 @@ export default function WorkflowEditorPage() {
   }, [selectedNodeId, wfNodes, setWfNodes]);
 
   // ---- 自动布局 ----
-  const handleAutoLayout = useCallback(() => {
-    const { nodes: layoutedNodes } = getLayoutedElements(canvasNodes, canvasEdges, "TB");
+  const handleAutoLayout = useCallback(async () => {
+    const { nodes: layoutedNodes } = await getLayoutedElements(canvasNodes, canvasEdges, "TB");
     setWfNodes((prev) => syncPositions(prev, layoutedNodes));
     setTimeout(() => fitView({ padding: 0.2, maxZoom: 1 }), 50);
   }, [canvasNodes, canvasEdges, setWfNodes, fitView]);
@@ -693,7 +695,7 @@ export default function WorkflowEditorPage() {
     "shift+a",
     (e) => {
       e.preventDefault();
-      handleAutoLayout();
+      void handleAutoLayout();
     },
     { enabled: !isEditorPanelOpen && viewMode !== "running" },
   );
@@ -1249,15 +1251,19 @@ export default function WorkflowEditorPage() {
         <div className="flex items-center gap-1 md:gap-2">
           {/* Kestra health indicator — 桌面端 */}
           <div
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] hidden md:flex transition-colors ${
+            className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] hidden md:flex transition-colors",
               kestraHealthy
                 ? "text-muted-foreground"
-                : "bg-red-50 text-red-600 border border-red-200 cursor-help dark:bg-red-950 dark:text-red-400 dark:border-red-800"
-            }`}
+                : "bg-red-50 text-red-600 border border-red-200 cursor-help dark:bg-red-950 dark:text-red-400 dark:border-red-800",
+            )}
             title={kestraHealthy ? "Kestra 已连接" : kestraError || "Kestra 未连接"}
           >
             <div
-              className={`w-2 h-2 rounded-full ${kestraHealthy ? "bg-green-500" : "bg-red-400 animate-pulse"}`}
+              className={cn(
+                "w-2 h-2 rounded-full",
+                kestraHealthy ? "bg-green-500" : "bg-red-400 animate-pulse",
+              )}
             />
             <span>
               Kestra
@@ -1474,105 +1480,225 @@ export default function WorkflowEditorPage() {
         />
       )}
 
-      {/* Canvas */}
-      <div className="flex-1 relative">
-        <div
-          ref={reactFlowWrapper}
-          className="w-full h-full"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchMove={handleTouchMove}
-        >
-          <ReactFlow
-            nodes={canvasNodes}
-            edges={canvasEdges}
-            onNodesChange={viewMode === "running" ? undefined : onCanvasNodesChange}
-            onEdgesChange={viewMode === "running" ? undefined : onCanvasEdgesChange}
-            onConnect={viewMode === "running" ? undefined : onConnect}
-            onNodeClick={onNodeClick}
-            onNodeContextMenu={viewMode === "running" ? undefined : onNodeContextMenu}
-            onPaneClick={onPaneClick}
-            onDragOver={viewMode === "running" ? undefined : onDragOver}
-            onDragLeave={viewMode === "running" ? undefined : onDragLeave}
-            onDrop={viewMode === "running" ? undefined : onDrop}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            nodesDraggable={viewMode !== "running"}
-            nodesConnectable={viewMode !== "running"}
-            elementsSelectable={viewMode !== "running"}
-            // 左键操控节点/框选，右键拖拽平移画布
-            panOnDrag={viewMode !== "running" ? [1] : true}
-            selectionOnDrag={viewMode !== "running"}
-            onContextMenu={
-              viewMode !== "running" ? (e: React.MouseEvent) => e.preventDefault() : undefined
-            }
-            fitView
-            fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-            minZoom={0.2}
-            maxZoom={2}
-            className="bg-muted/30"
-            defaultEdgeOptions={{
-              type: "workflowEdge",
-              animated: true,
-            }}
-          >
-            <FitViewOnMount />
-            <Controls
-              className="!bg-card !border !border-border !rounded-lg !shadow-sm !left-3 !bottom-14"
-              showZoom
-              showFitView
-              showInteractive={false}
-            />
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={20}
-              size={1.2}
-              color="var(--border, #e2e8f0)"
-            />
-            <MiniMap
-              className="!bg-card !border !border-border !rounded-lg !shadow-sm hidden md:block"
-              nodeColor="var(--muted-foreground, #818cf8)"
-              maskColor="var(--background, rgba(0,0,0,0.15))"
-              pannable
-              zoomable
-            />
-            <ZoomIndicator />
-          </ReactFlow>
-        </div>
+      <Group orientation="horizontal" className="flex-1">
+        <Panel defaultSize={rightPanel === "none" ? 100 : 70} minSize={50}>
+          <div className="h-full relative">
+            <div
+              ref={reactFlowWrapper}
+              className="w-full h-full"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchMove}
+            >
+              <ReactFlow
+                nodes={canvasNodes}
+                edges={canvasEdges}
+                onNodesChange={viewMode === "running" ? undefined : onCanvasNodesChange}
+                onEdgesChange={viewMode === "running" ? undefined : onCanvasEdgesChange}
+                onConnect={viewMode === "running" ? undefined : onConnect}
+                onNodeClick={onNodeClick}
+                onNodeContextMenu={viewMode === "running" ? undefined : onNodeContextMenu}
+                onPaneClick={onPaneClick}
+                onDragOver={viewMode === "running" ? undefined : onDragOver}
+                onDragLeave={viewMode === "running" ? undefined : onDragLeave}
+                onDrop={viewMode === "running" ? undefined : onDrop}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                nodesDraggable={viewMode !== "running"}
+                nodesConnectable={viewMode !== "running"}
+                elementsSelectable={viewMode !== "running"}
+                // 左键操控节点/框选，右键拖拽平移画布
+                panOnDrag={viewMode !== "running" ? [1] : true}
+                selectionOnDrag={viewMode !== "running"}
+                onContextMenu={
+                  viewMode !== "running" ? (e: React.MouseEvent) => e.preventDefault() : undefined
+                }
+                fitView
+                fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+                minZoom={0.2}
+                maxZoom={2}
+                className="bg-muted/30"
+                defaultEdgeOptions={{
+                  type: "workflowEdge",
+                  animated: true,
+                }}
+              >
+                <FitViewOnMount />
+                <Controls
+                  className="!bg-card !border !border-border !rounded-lg !shadow-sm !left-3 !bottom-14"
+                  showZoom
+                  showFitView
+                  showInteractive={false}
+                />
+                <Background
+                  variant={BackgroundVariant.Dots}
+                  gap={20}
+                  size={1.2}
+                  color="var(--border, #e2e8f0)"
+                />
+                <MiniMap
+                  className="!bg-card !border !border-border !rounded-lg !shadow-sm hidden md:block"
+                  nodeColor="var(--muted-foreground, #818cf8)"
+                  maskColor="var(--background, rgba(0,0,0,0.15))"
+                  pannable
+                  zoomable
+                />
+                <ZoomIndicator />
+              </ReactFlow>
+            </div>
 
-        {/* 画布浮动工具栏 — 移动端隐藏（功能在更多菜单中） */}
-        {!isMobile && (
-          <CanvasToolbar
-            onAutoLayout={handleAutoLayout}
-            onFitView={() => fitView({ padding: 0.2, maxZoom: 1 })}
-            onFromTemplate={() => setTemplateDialogOpen(true)}
-            onSaveAsTemplate={handleSaveAsTemplate}
-          />
+            {/* 画布浮动工具栏 — 移动端隐藏（功能在更多菜单中） */}
+            {!isMobile && (
+              <CanvasToolbar
+                onAutoLayout={handleAutoLayout}
+                onFitView={() => fitView({ padding: 0.2, maxZoom: 1 })}
+                onFromTemplate={() => setTemplateDialogOpen(true)}
+                onSaveAsTemplate={handleSaveAsTemplate}
+              />
+            )}
+
+            {/* 容器嵌套面包屑 */}
+            <Breadcrumb />
+
+            {/* Ctrl+F 搜索定位 */}
+            {searchOpen && (
+              <SearchOverlay
+                searchQuery={searchQuery}
+                onQueryChange={setSearchQuery}
+                results={searchResults}
+                onSelect={handleSearchSelect}
+                onClose={() => {
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }}
+                inputRef={searchInputRef}
+              />
+            )}
+
+            {/* 左侧插件面板 — 桌面端 */}
+            {!isMobile && (
+              <NodeCreatePanel isOpen={panelOpen} onToggle={() => setPanelOpen(!panelOpen)} />
+            )}
+          </div>
+        </Panel>
+
+        {rightPanel !== "none" && (
+          <>
+            <Separator className="w-1 bg-border hover:bg-primary/50 transition-colors" />
+            <Panel defaultSize={30} minSize={20} maxSize={50}>
+              <div className="h-full border-l border-border bg-background overflow-auto">
+                {rightPanel === "task" && selectedNodeForPanel && (
+                  <TaskConfigPanel
+                    nodeId={selectedNodeForPanel.id}
+                    label={selectedNodeForPanel.label}
+                    taskConfig={selectedNodeForPanel.taskConfig}
+                    inputs={kestraInputs}
+                    onUpdate={handleTaskUpdate}
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "inputs" && (
+                  <InputConfigPanel
+                    inputs={kestraInputs}
+                    onUpdate={(ki) =>
+                      setInputs(
+                        ki.map((k) => ({
+                          id: k.id,
+                          type: k.type as WorkflowInput["type"],
+                          defaults: k.defaults,
+                          description: k.description,
+                          required: k.required,
+                        })),
+                      )
+                    }
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "yaml" && (
+                  <Suspense
+                    fallback={
+                      <div className="h-full flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      </div>
+                    }
+                  >
+                    <KestraYamlPanel
+                      nodes={wfNodes}
+                      edges={wfEdges}
+                      inputs={inputs}
+                      variables={wfVariables}
+                      flowId={workflowMeta.flowId}
+                      namespace={workflowMeta.namespace}
+                      onImport={handleYamlImport}
+                      onClose={() => setRightPanel("none")}
+                    />
+                  </Suspense>
+                )}
+                {rightPanel === "drafts" && (
+                  <DraftHistory
+                    drafts={(draftsQuery.data ?? []).map((d) => ({
+                      id: d.id,
+                      message: d.message,
+                      createdAt:
+                        d.createdAt instanceof Date
+                          ? d.createdAt.toISOString()
+                          : String(d.createdAt),
+                    }))}
+                    onRollback={handleDraftRollback}
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "releases" && (
+                  <ReleaseHistory
+                    releases={(releasesQuery.data ?? []).map((r) => ({
+                      id: r.id,
+                      version: r.version,
+                      name: r.name,
+                      yaml: r.yaml,
+                      publishedAt:
+                        r.publishedAt instanceof Date
+                          ? r.publishedAt.toISOString()
+                          : String(r.publishedAt),
+                    }))}
+                    onRollback={handleReleaseRollback}
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "triggers" && savedWorkflowId && (
+                  <TriggerPanel
+                    workflowId={savedWorkflowId}
+                    onCreate={() => setShowTriggerForm(true)}
+                  />
+                )}
+                {rightPanel === "executions" && savedWorkflowId && (
+                  <ExecutionHistory
+                    workflowId={savedWorkflowId}
+                    onSelect={(exec) => {
+                      setCurrentExecution(exec);
+                      setRightPanel("none");
+                    }}
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "production-executions" && savedWorkflowId && (
+                  <ProductionExecHistory
+                    workflowId={savedWorkflowId}
+                    onClose={() => setRightPanel("none")}
+                  />
+                )}
+                {rightPanel === "settings" && (
+                  <NamespaceSettings
+                    namespaceId={workflowMeta.namespace}
+                    namespaceName={workflowMeta.namespace}
+                    onClose={() => setRightPanel("none")}
+                    defaultTab={settingsTab}
+                  />
+                )}
+              </div>
+            </Panel>
+          </>
         )}
-
-        {/* 容器嵌套面包屑 */}
-        <Breadcrumb />
-
-        {/* Ctrl+F 搜索定位 */}
-        {searchOpen && (
-          <SearchOverlay
-            searchQuery={searchQuery}
-            onQueryChange={setSearchQuery}
-            results={searchResults}
-            onSelect={handleSearchSelect}
-            onClose={() => {
-              setSearchOpen(false);
-              setSearchQuery("");
-            }}
-            inputRef={searchInputRef}
-          />
-        )}
-
-        {/* 左侧插件面板 — 桌面端 */}
-        {!isMobile && (
-          <NodeCreatePanel isOpen={panelOpen} onToggle={() => setPanelOpen(!panelOpen)} />
-        )}
-      </div>
+      </Group>
 
       {/* 移动端节点创建 Drawer */}
       {isMobile && (
@@ -1636,83 +1762,6 @@ export default function WorkflowEditorPage() {
           );
         })()}
 
-      {/* 右侧面板 */}
-      {rightPanel === "task" && selectedNodeForPanel && (
-        <TaskConfigPanel
-          nodeId={selectedNodeForPanel.id}
-          label={selectedNodeForPanel.label}
-          taskConfig={selectedNodeForPanel.taskConfig}
-          inputs={kestraInputs}
-          onUpdate={handleTaskUpdate}
-          onClose={() => setRightPanel("none")}
-        />
-      )}
-      {rightPanel === "inputs" && (
-        <InputConfigPanel
-          inputs={kestraInputs}
-          onUpdate={(ki) =>
-            setInputs(
-              ki.map((k) => ({
-                id: k.id,
-                type: k.type as WorkflowInput["type"],
-                defaults: k.defaults,
-                description: k.description,
-                required: k.required,
-              })),
-            )
-          }
-          onClose={() => setRightPanel("none")}
-        />
-      )}
-      {rightPanel === "yaml" && (
-        <Suspense
-          fallback={
-            <div className="fixed top-0 right-0 h-screen w-full md:w-[560px] bg-background border-l border-border flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            </div>
-          }
-        >
-          <KestraYamlPanel
-            nodes={wfNodes}
-            edges={wfEdges}
-            inputs={inputs}
-            variables={wfVariables}
-            flowId={workflowMeta.flowId}
-            namespace={workflowMeta.namespace}
-            onImport={handleYamlImport}
-            onClose={() => setRightPanel("none")}
-          />
-        </Suspense>
-      )}
-      {rightPanel === "drafts" && (
-        <DraftHistory
-          drafts={(draftsQuery.data ?? []).map((d) => ({
-            id: d.id,
-            message: d.message,
-            createdAt:
-              d.createdAt instanceof Date ? d.createdAt.toISOString() : String(d.createdAt),
-          }))}
-          onRollback={handleDraftRollback}
-          onClose={() => setRightPanel("none")}
-        />
-      )}
-      {rightPanel === "releases" && (
-        <ReleaseHistory
-          releases={(releasesQuery.data ?? []).map((r) => ({
-            id: r.id,
-            version: r.version,
-            name: r.name,
-            yaml: r.yaml,
-            publishedAt:
-              r.publishedAt instanceof Date ? r.publishedAt.toISOString() : String(r.publishedAt),
-          }))}
-          onRollback={handleReleaseRollback}
-          onClose={() => setRightPanel("none")}
-        />
-      )}
-      {rightPanel === "triggers" && savedWorkflowId && (
-        <TriggerPanel workflowId={savedWorkflowId} onCreate={() => setShowTriggerForm(true)} />
-      )}
       {showPublishDialog && (
         <PublishDialog
           nodes={wfNodes}
@@ -1752,21 +1801,6 @@ export default function WorkflowEditorPage() {
           onSubmit={handleExecuteWithInputs}
           onCancel={() => setShowInputForm(false)}
         />
-      )}
-
-      {rightPanel === "executions" && savedWorkflowId && (
-        <ExecutionHistory
-          workflowId={savedWorkflowId}
-          onSelect={(exec) => {
-            setCurrentExecution(exec);
-            setRightPanel("none");
-          }}
-          onClose={() => setRightPanel("none")}
-        />
-      )}
-
-      {rightPanel === "production-executions" && savedWorkflowId && (
-        <ProductionExecHistory workflowId={savedWorkflowId} onClose={() => setRightPanel("none")} />
       )}
 
       {rightPanel === "settings" && (

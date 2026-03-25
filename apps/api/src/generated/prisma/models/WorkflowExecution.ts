@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model WorkflowExecution
@@ -876,8 +876,14 @@ export type $WorkflowExecutionPayload<ExtArgs extends runtime.Types.Extensions.I
     workflowId: string
     releaseId: string
     kestraExecId: string
+    /**
+     * [InputValues]
+     */
     inputValues: runtime.JsonValue
     state: string
+    /**
+     * [TaskRun]
+     */
     taskRuns: runtime.JsonValue
     triggeredBy: string
     startedAt: Date | null

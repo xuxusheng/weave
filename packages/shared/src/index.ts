@@ -18,3 +18,4 @@ export {
   getNodeColor,
   EDGE_STYLES,
 } from "./workflow.js"
+export { TERMINAL_STATES, isTerminalState } from "./workflow.js"

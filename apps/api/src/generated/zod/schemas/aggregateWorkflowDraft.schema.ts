@@ -1,0 +1,12 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { WorkflowDraftOrderByWithRelationInputObjectSchema as WorkflowDraftOrderByWithRelationInputObjectSchema } from './objects/WorkflowDraftOrderByWithRelationInput.schema';
+import { WorkflowDraftWhereInputObjectSchema as WorkflowDraftWhereInputObjectSchema } from './objects/WorkflowDraftWhereInput.schema';
+import { WorkflowDraftWhereUniqueInputObjectSchema as WorkflowDraftWhereUniqueInputObjectSchema } from './objects/WorkflowDraftWhereUniqueInput.schema';
+import { WorkflowDraftCountAggregateInputObjectSchema as WorkflowDraftCountAggregateInputObjectSchema } from './objects/WorkflowDraftCountAggregateInput.schema';
+import { WorkflowDraftMinAggregateInputObjectSchema as WorkflowDraftMinAggregateInputObjectSchema } from './objects/WorkflowDraftMinAggregateInput.schema';
+import { WorkflowDraftMaxAggregateInputObjectSchema as WorkflowDraftMaxAggregateInputObjectSchema } from './objects/WorkflowDraftMaxAggregateInput.schema';
+
+export const WorkflowDraftAggregateSchema: z.ZodType<Prisma.WorkflowDraftAggregateArgs> = z.object({ orderBy: z.union([WorkflowDraftOrderByWithRelationInputObjectSchema, WorkflowDraftOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowDraftWhereInputObjectSchema.optional(), cursor: WorkflowDraftWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowDraftCountAggregateInputObjectSchema ]).optional(), _min: WorkflowDraftMinAggregateInputObjectSchema.optional(), _max: WorkflowDraftMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.WorkflowDraftAggregateArgs>;
+
+export const WorkflowDraftAggregateZodSchema = z.object({ orderBy: z.union([WorkflowDraftOrderByWithRelationInputObjectSchema, WorkflowDraftOrderByWithRelationInputObjectSchema.array()]).optional(), where: WorkflowDraftWhereInputObjectSchema.optional(), cursor: WorkflowDraftWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), WorkflowDraftCountAggregateInputObjectSchema ]).optional(), _min: WorkflowDraftMinAggregateInputObjectSchema.optional(), _max: WorkflowDraftMaxAggregateInputObjectSchema.optional() }).strict();

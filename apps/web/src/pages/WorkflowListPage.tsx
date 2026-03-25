@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { trpc } from "@/lib/trpc";
 import { useWorkflowStore } from "@/stores/workflow";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,121 @@ function stateLabel(state: string): string {
 
 type StatusFilter = "all" | "draft";
 
+interface WorkflowItem {
+  id: string;
+  name: string;
+  flowId: string;
+  namespaceId: string;
+  disabled: boolean;
+  publishedVersion: number;
+  createdAt: Date;
+  updatedAt: Date;
+  triggers: Array<{
+    id: string;
+    name: string;
+    type: string;
+    config: unknown;
+    disabled: boolean;
+  }>;
+  lastExecution: {
+    state: string;
+    triggeredBy: string;
+    startedAt: string | null;
+    endedAt: string | null;
+    createdAt: string;
+  } | null;
+}
+
+function WorkflowCard({
+  workflow: wf,
+  onNavigate,
+  onDelete,
+}: {
+  workflow: WorkflowItem;
+  onNavigate: ReturnType<typeof useNavigate>;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <Card
+      className="group relative cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-foreground/20"
+      onClick={() =>
+        onNavigate({ to: "/workflows/$workflowId/edit", params: { workflowId: wf.id } })
+      }
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <CardTitle className="truncate pr-2 text-base">{wf.name}</CardTitle>
+          <CardAction>
+            {wf.publishedVersion > 0 ? (
+              <Badge
+                variant="default"
+                className="gap-0.5 bg-green-500/15 text-green-700 dark:text-green-400"
+              >
+                v{wf.publishedVersion}
+              </Badge>
+            ) : (
+              <Badge variant="outline">草稿</Badge>
+            )}
+          </CardAction>
+        </div>
+        <CardDescription className="flex items-center gap-1 text-xs">
+          <GitBranch className="h-3 w-3" />
+          {wf.flowId}
+        </CardDescription>
+      </CardHeader>
+
+      {(wf.triggers.length > 0 || wf.lastExecution) && (
+        <CardContent className="space-y-2.5">
+          {wf.triggers.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {wf.triggers.map((trigger) => (
+                <Badge key={trigger.id} variant="secondary" className="gap-0.5 font-normal">
+                  {trigger.type === "schedule" ? (
+                    <Timer className="h-3 w-3" />
+                  ) : (
+                    <Webhook className="h-3 w-3" />
+                  )}
+                  {trigger.name}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {wf.lastExecution && (
+            <div className="flex items-center gap-1.5 text-xs">
+              <StateIcon state={wf.lastExecution.state} />
+              <span className="text-muted-foreground">
+                {stateLabel(wf.lastExecution.state)} ·{" "}
+                {formatRelativeTime(wf.lastExecution.createdAt)}
+              </span>
+            </div>
+          )}
+        </CardContent>
+      )}
+
+      <CardFooter className="border-t bg-transparent p-0">
+        <div className="flex w-full items-center justify-between px-4 py-2.5">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {formatDate(wf.updatedAt)}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground opacity-0 transition-all hover:text-destructive group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(wf.id);
+            }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
+
 export default function WorkflowListPage() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
@@ -152,20 +268,48 @@ export default function WorkflowListPage() {
   const filteredWorkflows = useMemo(() => {
     if (!workflows) return [];
     return workflows.filter((wf) => {
-      // Status filter
       if (statusFilter === "draft" && wf.publishedVersion > 0) return false;
-
-      // Search filter
       if (search) {
         const q = search.toLowerCase();
         if (!wf.name.toLowerCase().includes(q) && !wf.flowId.toLowerCase().includes(q)) {
           return false;
         }
       }
-
       return true;
     });
   }, [workflows, search, statusFilter]);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const el = parentRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const columnCount = containerWidth >= 1024 ? 3 : containerWidth >= 640 ? 2 : 1;
+
+  const rows = useMemo(() => {
+    const result: (typeof filteredWorkflows)[] = [];
+    for (let i = 0; i < filteredWorkflows.length; i += columnCount) {
+      result.push(filteredWorkflows.slice(i, i + columnCount));
+    }
+    return result;
+  }, [filteredWorkflows, columnCount]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200,
+    overscan: 2,
+  });
 
   const handleCreate = () => {
     setNewWorkflowName("");
@@ -191,7 +335,7 @@ export default function WorkflowListPage() {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div ref={parentRef} className="flex-1 overflow-auto p-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">工作流</h1>
@@ -286,94 +430,40 @@ export default function WorkflowListPage() {
         )}
 
         {filteredWorkflows && filteredWorkflows.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredWorkflows.map((wf) => (
-              <Card
-                key={wf.id}
-                className="group relative cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-foreground/20"
-                onClick={() =>
-                  navigate({ to: "/workflows/$workflowId/edit", params: { workflowId: wf.id } })
-                }
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="truncate pr-2 text-base">{wf.name}</CardTitle>
-                    <CardAction>
-                      {wf.publishedVersion > 0 ? (
-                        <Badge
-                          variant="default"
-                          className="gap-0.5 bg-green-500/15 text-green-700 dark:text-green-400"
-                        >
-                          v{wf.publishedVersion}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">草稿</Badge>
-                      )}
-                    </CardAction>
-                  </div>
-                  <CardDescription className="flex items-center gap-1 text-xs">
-                    <GitBranch className="h-3 w-3" />
-                    {wf.flowId}
-                  </CardDescription>
-                </CardHeader>
-
-                {(wf.triggers.length > 0 || wf.lastExecution) && (
-                  <CardContent className="space-y-2.5">
-                    {/* Triggers */}
-                    {wf.triggers.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {wf.triggers.map((trigger) => (
-                          <Badge
-                            key={trigger.id}
-                            variant="secondary"
-                            className="gap-0.5 font-normal"
-                          >
-                            {trigger.type === "schedule" ? (
-                              <Timer className="h-3 w-3" />
-                            ) : (
-                              <Webhook className="h-3 w-3" />
-                            )}
-                            {trigger.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Last execution */}
-                    {wf.lastExecution && (
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <StateIcon state={wf.lastExecution.state} />
-                        <span className="text-muted-foreground">
-                          {stateLabel(wf.lastExecution.state)} ·{" "}
-                          {formatRelativeTime(wf.lastExecution.createdAt)}
-                        </span>
-                      </div>
-                    )}
-                  </CardContent>
-                )}
-
-                {/* Footer */}
-                <CardFooter className="border-t bg-transparent p-0">
-                  <div className="flex w-full items-center justify-between px-4 py-2.5">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(wf.updatedAt)}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-muted-foreground opacity-0 transition-all hover:text-destructive group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(wf.id);
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              if (!row) return null;
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                  {row.map((wf) => (
+                    <WorkflowCard
+                      key={wf.id}
+                      workflow={wf}
+                      onNavigate={navigate}
+                      onDelete={setDeleteTarget}
+                    />
+                  ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -1,0 +1,13 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { VariableWhereInputObjectSchema as VariableWhereInputObjectSchema } from './objects/VariableWhereInput.schema';
+import { VariableOrderByWithAggregationInputObjectSchema as VariableOrderByWithAggregationInputObjectSchema } from './objects/VariableOrderByWithAggregationInput.schema';
+import { VariableScalarWhereWithAggregatesInputObjectSchema as VariableScalarWhereWithAggregatesInputObjectSchema } from './objects/VariableScalarWhereWithAggregatesInput.schema';
+import { VariableScalarFieldEnumSchema } from './enums/VariableScalarFieldEnum.schema';
+import { VariableCountAggregateInputObjectSchema as VariableCountAggregateInputObjectSchema } from './objects/VariableCountAggregateInput.schema';
+import { VariableMinAggregateInputObjectSchema as VariableMinAggregateInputObjectSchema } from './objects/VariableMinAggregateInput.schema';
+import { VariableMaxAggregateInputObjectSchema as VariableMaxAggregateInputObjectSchema } from './objects/VariableMaxAggregateInput.schema';
+
+export const VariableGroupBySchema: z.ZodType<Prisma.VariableGroupByArgs> = z.object({ where: VariableWhereInputObjectSchema.optional(), orderBy: z.union([VariableOrderByWithAggregationInputObjectSchema, VariableOrderByWithAggregationInputObjectSchema.array()]).optional(), having: VariableScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(VariableScalarFieldEnumSchema), _count: z.union([ z.literal(true), VariableCountAggregateInputObjectSchema ]).optional(), _min: VariableMinAggregateInputObjectSchema.optional(), _max: VariableMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.VariableGroupByArgs>;
+
+export const VariableGroupByZodSchema = z.object({ where: VariableWhereInputObjectSchema.optional(), orderBy: z.union([VariableOrderByWithAggregationInputObjectSchema, VariableOrderByWithAggregationInputObjectSchema.array()]).optional(), having: VariableScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(VariableScalarFieldEnumSchema), _count: z.union([ z.literal(true), VariableCountAggregateInputObjectSchema ]).optional(), _min: VariableMinAggregateInputObjectSchema.optional(), _max: VariableMaxAggregateInputObjectSchema.optional() }).strict();

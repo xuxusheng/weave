@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from "react";
 import { Settings, X, Copy, RefreshCw, Eye, EyeOff, Key } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -179,7 +180,7 @@ function ApiKeyPanel({ namespaceId }: { namespaceId: string }) {
           disabled={regenerateMutation.isPending}
         >
           <RefreshCw
-            className={`w-3.5 h-3.5 ${regenerateMutation.isPending ? "animate-spin" : ""}`}
+            className={cn("w-3.5 h-3.5", regenerateMutation.isPending ? "animate-spin" : "")}
           />
           重新生成
         </Button>

@@ -1,0 +1,13 @@
+import type { Prisma } from '../../prisma/client';
+import * as z from 'zod';
+import { NamespaceWhereInputObjectSchema as NamespaceWhereInputObjectSchema } from './objects/NamespaceWhereInput.schema';
+import { NamespaceOrderByWithAggregationInputObjectSchema as NamespaceOrderByWithAggregationInputObjectSchema } from './objects/NamespaceOrderByWithAggregationInput.schema';
+import { NamespaceScalarWhereWithAggregatesInputObjectSchema as NamespaceScalarWhereWithAggregatesInputObjectSchema } from './objects/NamespaceScalarWhereWithAggregatesInput.schema';
+import { NamespaceScalarFieldEnumSchema } from './enums/NamespaceScalarFieldEnum.schema';
+import { NamespaceCountAggregateInputObjectSchema as NamespaceCountAggregateInputObjectSchema } from './objects/NamespaceCountAggregateInput.schema';
+import { NamespaceMinAggregateInputObjectSchema as NamespaceMinAggregateInputObjectSchema } from './objects/NamespaceMinAggregateInput.schema';
+import { NamespaceMaxAggregateInputObjectSchema as NamespaceMaxAggregateInputObjectSchema } from './objects/NamespaceMaxAggregateInput.schema';
+
+export const NamespaceGroupBySchema: z.ZodType<Prisma.NamespaceGroupByArgs> = z.object({ where: NamespaceWhereInputObjectSchema.optional(), orderBy: z.union([NamespaceOrderByWithAggregationInputObjectSchema, NamespaceOrderByWithAggregationInputObjectSchema.array()]).optional(), having: NamespaceScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(NamespaceScalarFieldEnumSchema), _count: z.union([ z.literal(true), NamespaceCountAggregateInputObjectSchema ]).optional(), _min: NamespaceMinAggregateInputObjectSchema.optional(), _max: NamespaceMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.NamespaceGroupByArgs>;
+
+export const NamespaceGroupByZodSchema = z.object({ where: NamespaceWhereInputObjectSchema.optional(), orderBy: z.union([NamespaceOrderByWithAggregationInputObjectSchema, NamespaceOrderByWithAggregationInputObjectSchema.array()]).optional(), having: NamespaceScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(NamespaceScalarFieldEnumSchema), _count: z.union([ z.literal(true), NamespaceCountAggregateInputObjectSchema ]).optional(), _min: NamespaceMinAggregateInputObjectSchema.optional(), _max: NamespaceMaxAggregateInputObjectSchema.optional() }).strict();

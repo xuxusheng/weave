@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Namespace
@@ -209,18 +209,18 @@ export type NamespaceOrderByWithRelationInput = {
 
 export type NamespaceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  kestraNamespace?: string
   AND?: Prisma.NamespaceWhereInput | Prisma.NamespaceWhereInput[]
   OR?: Prisma.NamespaceWhereInput[]
   NOT?: Prisma.NamespaceWhereInput | Prisma.NamespaceWhereInput[]
   name?: Prisma.StringFilter<"Namespace"> | string
-  kestraNamespace?: Prisma.StringFilter<"Namespace"> | string
   description?: Prisma.StringNullableFilter<"Namespace"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Namespace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Namespace"> | Date | string
   workflows?: Prisma.WorkflowListRelationFilter
   variables?: Prisma.VariableListRelationFilter
   secrets?: Prisma.SecretListRelationFilter
-}, "id">
+}, "id" | "kestraNamespace">
 
 export type NamespaceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

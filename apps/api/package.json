@@ -19,6 +19,7 @@
     "dotenv": "^17.3.1",
     "hono": "^4.12.9",
     "pg": "^8.20.0",
+    "prisma-json-types-generator": "^4.1.1",
     "superjson": "^2.2.6",
     "yaml": "^2.8.3",
     "zod": "^4.3.6"
@@ -27,6 +28,7 @@
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
     "prisma": "^7.5.0",
+    "prisma-zod-generator": "^2.1.4",
     "typescript": "~6.0.2"
   }
 }
