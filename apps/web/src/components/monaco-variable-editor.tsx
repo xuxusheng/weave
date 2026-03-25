@@ -5,19 +5,7 @@ import type * as Monaco from "monaco-editor"
 import { getAllVariables, defaultVariableGroups } from "@/types/variables"
 import type { VariableGroup } from "@/types/variables"
 import { cn } from "@/lib/utils"
-
-function createMinimalMonacoEnvironment() {
-  return {
-    getWorker: function (_workerId: string, _label: string) {
-      return new Worker(
-        new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url),
-        { type: "module" }
-      )
-    },
-  }
-}
-
-self.MonacoEnvironment = createMinimalMonacoEnvironment()
+import { setupMonacoWorker } from "@/lib/monaco-worker"
 
 interface MonacoVariableEditorProps {
   value?: string
@@ -38,6 +26,10 @@ export function MonacoVariableEditor({
   const monacoRef = useRef<typeof Monaco | null>(null)
   const decorationIdsRef = useRef<string[]>([])
   const allVariables = getAllVariables(variableGroups)
+
+  useEffect(() => {
+    setupMonacoWorker()
+  }, [])
 
   // Inject decoration styles
   useEffect(() => {

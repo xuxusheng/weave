@@ -19,21 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import YAML from "yaml"
-
-function createMinimalMonacoEnvironment() {
-  return {
-    getWorker: function (_workerId: string, _label: string) {
-      return new Worker(
-        new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url),
-        { type: "module" }
-      )
-    },
-  }
-}
-
-if (!self.MonacoEnvironment) {
-  self.MonacoEnvironment = createMinimalMonacoEnvironment()
-}
+import { setupMonacoWorker } from "@/lib/monaco-worker"
 
 interface KestraYamlPanelProps {
   nodes: WorkflowNode[]
@@ -71,6 +57,10 @@ export function KestraYamlPanel({
   const [importDiff, setImportDiff] = useState<ImportDiff | null>(null)
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null)
+
+  useEffect(() => {
+    setupMonacoWorker()
+  }, [])
 
   const yaml = useMemo(
     () => toKestraYaml(nodes, edges, inputs, variables, flowId, namespace),
