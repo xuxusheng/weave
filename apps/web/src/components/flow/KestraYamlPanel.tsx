@@ -20,6 +20,21 @@ import {
 } from "@/components/ui/dialog"
 import YAML from "yaml"
 
+function createMinimalMonacoEnvironment() {
+  return {
+    getWorker: function (_workerId: string, _label: string) {
+      return new Worker(
+        new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url),
+        { type: "module" }
+      )
+    },
+  }
+}
+
+if (!self.MonacoEnvironment) {
+  self.MonacoEnvironment = createMinimalMonacoEnvironment()
+}
+
 interface KestraYamlPanelProps {
   nodes: WorkflowNode[]
   edges: WorkflowEdge[]

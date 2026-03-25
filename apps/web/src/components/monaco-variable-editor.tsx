@@ -1,5 +1,4 @@
 import { useRef, useCallback, useEffect } from "react"
-import loader from "@monaco-editor/loader"
 import Editor from "@monaco-editor/react"
 import type { OnMount } from "@monaco-editor/react"
 import type * as Monaco from "monaco-editor"
@@ -7,8 +6,18 @@ import { getAllVariables, defaultVariableGroups } from "@/types/variables"
 import type { VariableGroup } from "@/types/variables"
 import { cn } from "@/lib/utils"
 
-// Use local Monaco files (no CDN)
-loader.config({ paths: { vs: "/node_modules/monaco-editor/min/vs" } })
+function createMinimalMonacoEnvironment() {
+  return {
+    getWorker: function (_workerId: string, _label: string) {
+      return new Worker(
+        new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url),
+        { type: "module" }
+      )
+    },
+  }
+}
+
+self.MonacoEnvironment = createMinimalMonacoEnvironment()
 
 interface MonacoVariableEditorProps {
   value?: string

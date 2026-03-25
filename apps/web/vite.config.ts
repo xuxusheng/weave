@@ -21,4 +21,19 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: [
+      "monaco-editor",
+      "@monaco-editor/react",
+      "@monaco-editor/loader",
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/monaco-editor/, /node_modules/],
+    },
+  },
+  worker: {
+    format: "es",
+  },
 });

@@ -1,7 +1,20 @@
-import { useState } from "react"
-import { MonacoVariableEditor } from "@/components/monaco-variable-editor"
+import { useState, lazy, Suspense } from "react"
 import { parseVariables, getAllVariables, defaultVariableGroups } from "@/types/variables"
-import { FileText, Search, HelpCircle } from "lucide-react"
+import { FileText, Search, HelpCircle, Loader2 } from "lucide-react"
+
+const MonacoVariableEditor = lazy(() => 
+  import("@/components/monaco-variable-editor").then(mod => ({ 
+    default: mod.MonacoVariableEditor 
+  }))
+)
+
+function EditorLoading() {
+  return (
+    <div className="flex items-center justify-center h-[400px] bg-muted/30 rounded-lg border border-border">
+      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+    </div>
+  )
+}
 
 export function MonacoVariableEditorPage() {
   const [value, setValue] = useState("")
@@ -19,7 +32,9 @@ export function MonacoVariableEditorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
         <div>
-          <MonacoVariableEditor value={value} onChange={setValue} height="400px" />
+          <Suspense fallback={<EditorLoading />}>
+            <MonacoVariableEditor value={value} onChange={setValue} height="400px" />
+          </Suspense>
         </div>
 
         <div className="flex flex-col gap-3">

@@ -5,25 +5,26 @@ WORKDIR /app
 COPY bunfig.toml package.json bun.lock ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/api/package.json ./apps/api/
+COPY packages/shared/package.json ./packages/shared/
 
 RUN bun install --frozen-lockfile
 
-# Copy source and build
 COPY . .
-RUN cd apps/api && bunx prisma generate
-RUN bun run build
+RUN bun run --parallel --filter '*' build
 
 # --- Production image ---
 FROM oven/bun:1-slim
 WORKDIR /app
 
-# Copy built backend + prisma files
-COPY --from=builder /app/apps/api/dist ./dist
+# Install prisma CLI for migrations at runtime
+RUN bun install -g prisma
+
+# Copy single bundled backend (includes Prisma WASM, no node_modules needed)
+COPY --from=builder /app/apps/api/dist/index.js ./index.js
+
+# Copy prisma files for migrations
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/prisma.config.ts ./
-COPY --from=builder /app/apps/api/package.json ./
-
-COPY --from=builder /app/node_modules ./node_modules
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh ./
@@ -38,4 +39,4 @@ EXPOSE 3000
 
 USER bun
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["bun", "run", "dist/index.js"]
+CMD ["bun", "run", "index.js"]

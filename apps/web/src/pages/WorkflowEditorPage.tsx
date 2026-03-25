@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, useEffect, memo, useState } from "react"
+import { useCallback, useRef, useMemo, useEffect, memo, useState, lazy, Suspense } from "react"
 import { useParams, Link } from "@tanstack/react-router"
 import type { RunningSnapshot } from "@/stores/workflow"
 import {
@@ -33,7 +33,7 @@ import { TaskConfigPanel } from "@/components/flow/TaskConfigPanel"
 import { TriggerPanel } from "@/components/flow/TriggerPanel"
 import { TriggerCreateForm } from "@/components/flow/TriggerCreateForm"
 import { InputConfigPanel } from "@/components/flow/InputConfigPanel"
-import { KestraYamlPanel } from "@/components/flow/KestraYamlPanel"
+const KestraYamlPanel = lazy(() => import("@/components/flow/KestraYamlPanel").then(mod => ({ default: mod.KestraYamlPanel })))
 import { DraftHistory } from "@/components/flow/DraftHistory"
 import { ReleaseHistory } from "@/components/flow/ReleaseHistory"
 import { PublishDialog } from "@/components/flow/PublishDialog"
@@ -1565,16 +1565,22 @@ export default function WorkflowEditorPage() {
         />
       )}
       {rightPanel === "yaml" && (
-        <KestraYamlPanel
-          nodes={wfNodes}
-          edges={wfEdges}
-          inputs={inputs}
-          variables={wfVariables}
-          flowId={workflowMeta.flowId}
-          namespace={workflowMeta.namespace}
-          onImport={handleYamlImport}
-          onClose={() => setRightPanel("none")}
-        />
+        <Suspense fallback={
+          <div className="fixed top-0 right-0 h-screen w-full md:w-[560px] bg-background border-l border-border flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          </div>
+        }>
+          <KestraYamlPanel
+            nodes={wfNodes}
+            edges={wfEdges}
+            inputs={inputs}
+            variables={wfVariables}
+            flowId={workflowMeta.flowId}
+            namespace={workflowMeta.namespace}
+            onImport={handleYamlImport}
+            onClose={() => setRightPanel("none")}
+          />
+        </Suspense>
       )}
       {rightPanel === "drafts" && (
         <DraftHistory
