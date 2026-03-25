@@ -60,7 +60,6 @@ import { saveUserTemplate } from "@/lib/templates";
 import { getLayoutedElements } from "@/lib/autoLayout";
 import { filterVisibleNodes, filterVisibleEdges, canExpandContainer } from "@/lib/containerUtils";
 import { isContainer } from "@/types/container";
-import { CONTAINER_MIN_WIDTH, CONTAINER_MIN_HEIGHT } from "@/lib/containerConstants";
 import {
   Rocket,
   Play,
@@ -133,7 +132,7 @@ const ZoomIndicator = memo(function ZoomIndicator() {
 export default function WorkflowEditorPage() {
   const { workflowId } = useParams({ from: "/workflows/$workflowId/edit" });
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { fitView, screenToFlowPosition, getNodes } = useReactFlow();
+  const { fitView, screenToFlowPosition } = useReactFlow();
 
   // ---- Mobile ----
   const isMobile = useIsMobile();
@@ -322,6 +321,27 @@ export default function WorkflowEditorPage() {
     toCanvasEdges(visibleWfEdges),
   );
 
+  const nodeBoundsMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { x: number; y: number; width: number; height: number; type: string; collapsed: boolean }
+    >();
+    for (const node of canvasNodes) {
+      const nodeData = node.data as Record<string, unknown>;
+      const nodeType = typeof nodeData?.type === "string" ? nodeData.type : "";
+      const collapsed = typeof nodeData?.collapsed === "boolean" ? nodeData.collapsed : false;
+      map.set(node.id, {
+        x: node.position.x,
+        y: node.position.y,
+        width: node.measured?.width ?? 200,
+        height: node.measured?.height ?? 40,
+        type: nodeType,
+        collapsed,
+      });
+    }
+    return map;
+  }, [canvasNodes]);
+
   // ---- 过滤后的业务状态变更 → 同步画布 ----
   useEffect(() => {
     setCanvasNodes(toCanvasNodes(visibleWfNodes, nodesWithMissingRefs, dragOverContainerId));
@@ -370,19 +390,15 @@ export default function WorkflowEditorPage() {
       longPressTimerRef.current = setTimeout(() => {
         longPressTriggeredRef.current = true;
         const pos = screenToFlowPosition({ x: touch.clientX, y: touch.clientY });
-        const nodes = getNodes();
         let hitNodeId: string | null = null;
-        for (let i = nodes.length - 1; i >= 0; i--) {
-          const n = nodes[i];
-          const nw = n.measured?.width ?? 200;
-          const nh = n.measured?.height ?? 40;
+        for (const [nodeId, bounds] of nodeBoundsMap) {
           if (
-            pos.x >= n.position.x &&
-            pos.x <= n.position.x + nw &&
-            pos.y >= n.position.y &&
-            pos.y <= n.position.y + nh
+            pos.x >= bounds.x &&
+            pos.x <= bounds.x + bounds.width &&
+            pos.y >= bounds.y &&
+            pos.y <= bounds.y + bounds.height
           ) {
-            hitNodeId = n.id;
+            hitNodeId = nodeId;
             break;
           }
         }
@@ -391,7 +407,7 @@ export default function WorkflowEditorPage() {
         }
       }, 500);
     },
-    [screenToFlowPosition, getNodes],
+    [screenToFlowPosition, nodeBoundsMap],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -438,26 +454,22 @@ export default function WorkflowEditorPage() {
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
 
-      // 检测悬浮在哪个展开的容器上方
       const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
       let found: string | null = null;
-      for (const n of getNodes()) {
-        const nodeType = typeof n.data?.type === "string" ? n.data.type : "";
-        if (!isContainer(nodeType) || n.data?.collapsed) continue;
-        const w = n.measured?.width ?? CONTAINER_MIN_WIDTH;
-        const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT;
+      for (const [nodeId, bounds] of nodeBoundsMap) {
+        if (!isContainer(bounds.type) || bounds.collapsed) continue;
         if (
-          position.x >= n.position.x &&
-          position.x <= n.position.x + w &&
-          position.y >= n.position.y &&
-          position.y <= n.position.y + h
+          position.x >= bounds.x &&
+          position.x <= bounds.x + bounds.width &&
+          position.y >= bounds.y &&
+          position.y <= bounds.y + bounds.height
         ) {
-          found = n.id;
+          found = nodeId;
         }
       }
       setDragOverContainerId(found);
     },
-    [screenToFlowPosition, getNodes],
+    [screenToFlowPosition, nodeBoundsMap],
   );
 
   const onDrop = useCallback(
@@ -482,23 +494,18 @@ export default function WorkflowEditorPage() {
         y: event.clientY,
       });
 
-      // 从 store 读实时状态，避免闭包过期
       const currentNodes = useWorkflowStore.getState().nodes;
 
-      // 判断 drop 位置是否在某个展开的容器节点内
       let targetContainerId: string | null = null;
-      for (const n of getNodes()) {
-        const nodeType = typeof n.data?.type === "string" ? n.data.type : "";
-        if (!isContainer(nodeType) || n.data?.collapsed) continue;
-        const w = n.measured?.width ?? CONTAINER_MIN_WIDTH;
-        const h = n.measured?.height ?? CONTAINER_MIN_HEIGHT;
+      for (const [nodeId, bounds] of nodeBoundsMap) {
+        if (!isContainer(bounds.type) || bounds.collapsed) continue;
         if (
-          position.x >= n.position.x &&
-          position.x <= n.position.x + w &&
-          position.y >= n.position.y &&
-          position.y <= n.position.y + h
+          position.x >= bounds.x &&
+          position.x <= bounds.x + bounds.width &&
+          position.y >= bounds.y &&
+          position.y <= bounds.y + bounds.height
         ) {
-          targetContainerId = n.id;
+          targetContainerId = nodeId;
         }
       }
 
@@ -518,7 +525,7 @@ export default function WorkflowEditorPage() {
       setWfNodes((prev) => [...prev, newNode]);
       setDragOverContainerId(null);
     },
-    [screenToFlowPosition, setWfNodes, getNodes],
+    [screenToFlowPosition, setWfNodes, nodeBoundsMap],
   );
 
   const onDragLeave = useCallback(() => {

@@ -65,7 +65,6 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
   const handleToggleCollapse = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      // 展开时检查嵌套深度
       if (d.collapsed) {
         const nodes = useWorkflowStore.getState().nodes;
         if (!canExpandContainer(id, nodes)) {
@@ -86,11 +85,11 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
     return (
       <div
         className={cn(
-          "relative px-4 py-3 rounded-2xl border-2 bg-white shadow-sm min-w-[220px] transition-all",
+          "group relative px-4 py-3 rounded-2xl border-2 bg-white min-w-[220px] transition-all duration-200",
           d.isDragOver
-            ? "border-solid scale-[1.02] shadow-lg ring-2 ring-primary/30"
+            ? "border-solid scale-[1.02] shadow-xl ring-2 ring-primary/30"
             : "border-dashed",
-          selected ? "shadow-lg" : "hover:shadow-md",
+          selected ? "shadow-xl ring-2 ring-offset-1" : "shadow-sm hover:shadow-md",
           execStyle?.pulse ? "animate-pulse" : "",
         )}
         style={{
@@ -102,32 +101,36 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
                 ? color
                 : `${color}88`,
           background: d.isDragOver ? `${color}15` : `${color}08`,
-          boxShadow: execStyle?.glow ?? undefined,
+          boxShadow: execStyle?.glow
+            ? execStyle.glow
+            : selected
+              ? `0 0 0 2px ${color}40, 0 8px 24px ${color}20`
+              : undefined,
         }}
       >
-        {/* 输入 Handle */}
         <Handle
           type="target"
           position={Position.Top}
-          className="!w-3 !h-3 !border-2 !border-white"
+          className={cn(
+            "!w-3 !h-3 !border-2 !border-white transition-transform duration-150",
+            "group-hover:!scale-125 hover:!scale-150",
+          )}
           style={{ background: color }}
         />
 
-        {/* 缺失引用标识 */}
         {d.hasMissingRefs && (
           <div
-            className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow-sm"
+            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow-sm animate-pulse ring-2 ring-amber-200"
             title="存在缺失的变量引用"
           >
             <AlertTriangle className="w-3 h-3 text-white" />
           </div>
         )}
 
-        {/* 头部：折叠按钮 + 类型 + 名称 */}
         <div className="flex items-center gap-2">
           <button
             onClick={handleToggleCollapse}
-            className="w-5 h-5 rounded flex items-center justify-center hover:bg-black/10 text-xs shrink-0"
+            className="w-5 h-5 rounded flex items-center justify-center hover:bg-black/10 text-xs shrink-0 transition-colors"
             title={d.collapsed ? "展开" : "折叠"}
           >
             {d.collapsed ? "▶" : "▼"}
@@ -138,7 +141,6 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
           </div>
         </div>
 
-        {/* 折叠时显示子任务摘要 */}
         {d.collapsed && d.childCount > 0 && (
           <div
             className="flex items-center gap-1 text-xs text-muted-foreground mt-2 pt-2 border-t border-dashed"
@@ -151,7 +153,6 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
           </div>
         )}
 
-        {/* 展开时显示分隔线 */}
         {!d.collapsed && (
           <div className="mt-2 pt-2 border-t border-dashed" style={{ borderColor: `${color}33` }}>
             <div
@@ -165,7 +166,6 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
           </div>
         )}
 
-        {/* 输出 Handle（多端口） */}
         {outputHandles.length > 0 ? (
           <div className="flex justify-around mt-2 -mb-1">
             {outputHandles.map((h) => (
@@ -180,7 +180,10 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
                   type="source"
                   id={h.id}
                   position={Position.Bottom}
-                  className="!w-3 !h-3 !border-2 !border-white"
+                  className={cn(
+                    "!w-3 !h-3 !border-2 !border-white transition-transform duration-150",
+                    "group-hover:!scale-125 hover:!scale-150",
+                  )}
                   style={{ background: h.color }}
                 />
               </div>
@@ -190,7 +193,10 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
           <Handle
             type="source"
             position={Position.Bottom}
-            className="!w-3 !h-3 !border-2 !border-white"
+            className={cn(
+              "!w-3 !h-3 !border-2 !border-white transition-transform duration-150",
+              "group-hover:!scale-125 hover:!scale-150",
+            )}
             style={{ background: color }}
           />
         )}
@@ -202,28 +208,34 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
   return (
     <div
       className={cn(
-        "relative px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[200px] transition-all",
-        selected ? "shadow-md" : "hover:shadow-md",
+        "group relative px-4 py-3 rounded-lg border-2 bg-white min-w-[200px] transition-all duration-200",
+        selected ? "shadow-lg ring-2 ring-offset-1" : "shadow-sm hover:shadow-md",
         execStyle?.pulse ? "animate-pulse" : "",
       )}
       style={{
         borderColor: execStyle ? execStyle.border : selected ? color : `${color}66`,
         borderLeftWidth: 4,
         borderLeftColor: execStyle ? execStyle.border : color,
-        boxShadow: execStyle?.glow ?? undefined,
+        boxShadow: execStyle?.glow
+          ? execStyle.glow
+          : selected
+            ? `0 0 0 2px ${color}40, 0 8px 24px ${color}20`
+            : undefined,
       }}
     >
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !border-2 !border-white"
+        className={cn(
+          "!w-3 !h-3 !border-2 !border-white transition-transform duration-150",
+          "group-hover:!scale-125 hover:!scale-150",
+        )}
         style={{ background: color }}
       />
 
-      {/* 缺失引用标识 */}
       {d.hasMissingRefs && (
         <div
-          className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow-sm"
+          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow-sm animate-pulse ring-2 ring-amber-200"
           title="存在缺失的变量引用"
         >
           <AlertTriangle className="w-3 h-3 text-white" />
@@ -247,7 +259,10 @@ export const WorkflowNode = memo(({ data, selected, id }: NodeProps) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !border-2 !border-white"
+        className={cn(
+          "!w-3 !h-3 !border-2 !border-white transition-transform duration-150",
+          "group-hover:!scale-125 hover:!scale-150",
+        )}
         style={{ background: color }}
       />
     </div>
