@@ -82,7 +82,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useIsMobile } from "@/hooks/use-mobile";
 // hooks/useAutoSave + useExecutionPoll 待接入（需要调整 handleSaveDraft 回调顺序）
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import type { WorkflowNode, WorkflowEdge, WorkflowInput } from "@/types/workflow";
+import type { WorkflowNode, WorkflowEdge, WorkflowInput, PluginEntry } from "@/types/workflow";
 import type { KestraInput } from "@/types/kestra";
 import type {
   ApiWorkflowNode,
@@ -246,15 +246,12 @@ export default function WorkflowEditorPage() {
       if (!node) return;
       setSearchHighlightId(nodeId);
       setSelectedNodeId(nodeId);
-      // Pan to the node position
-      const pos = node.ui ?? { x: 150, y: 50 };
       void fitView({
-        nodes: [{ id: nodeId, position: pos, data: {} } as Node],
+        nodes: [{ id: nodeId } as Node],
         padding: 1,
         maxZoom: 1.5,
         duration: 400,
       });
-      // The fitView with nodes option centers on the specific node
       setSearchOpen(false);
       setSearchQuery("");
       setTimeout(() => setSearchHighlightId(null), 2000);
@@ -417,6 +414,13 @@ export default function WorkflowEditorPage() {
     setContextMenu(null);
   }, [setSelectedNodeId, setRightPanel]);
 
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      setWfNodes((prev) => prev.map((n) => (n.id === node.id ? { ...n, ui: node.position } : n)));
+    },
+    [setWfNodes],
+  );
+
   // ---- 右键菜单 ----
   const [contextMenu, setContextMenu] = useState<{
     nodeId: string;
@@ -520,6 +524,29 @@ export default function WorkflowEditorPage() {
   const onDragLeave = useCallback(() => {
     setDragOverContainerId(null);
   }, []);
+
+  const handleMobilePluginClick = useCallback(
+    (plugin: PluginEntry) => {
+      const currentNodes = useWorkflowStore.getState().nodes;
+      const maxSort = currentNodes.reduce((max, n) => Math.max(max, n.sortIndex), -1);
+
+      const newNode: WorkflowNode = {
+        id: genNodeId(),
+        type: plugin.type,
+        name: plugin.name,
+        containerId: null,
+        sortIndex: maxSort + 1,
+        spec: plugin.defaultSpec ?? {},
+        ui: { x: 150, y: 50 },
+      };
+
+      setWfNodes((prev) => [...prev, newNode]);
+      setNodeCreateDrawerOpen(false);
+      setSelectedNodeId(newNode.id);
+      setRightPanel("task");
+    },
+    [setWfNodes, setSelectedNodeId, setRightPanel],
+  );
 
   // ---- 任务配置更新：解析 YAML 回写 spec ----
   const handleTaskUpdate = useCallback(
@@ -631,10 +658,16 @@ export default function WorkflowEditorPage() {
 
   // ---- 自动布局 ----
   const handleAutoLayout = useCallback(async () => {
-    const { nodes: layoutedNodes } = await getLayoutedElements(canvasNodes, canvasEdges, "TB");
+    const currentCanvasNodes = toCanvasNodes(visibleWfNodes, nodesWithMissingRefs);
+    const currentCanvasEdges = toCanvasEdges(visibleWfEdges);
+    const { nodes: layoutedNodes } = await getLayoutedElements(
+      currentCanvasNodes,
+      currentCanvasEdges,
+      "TB",
+    );
     setWfNodes((prev) => syncPositions(prev, layoutedNodes));
     setTimeout(() => fitView({ padding: 0.2, maxZoom: 1 }), 50);
-  }, [canvasNodes, canvasEdges, setWfNodes, fitView]);
+  }, [visibleWfNodes, visibleWfEdges, nodesWithMissingRefs, setWfNodes, fitView]);
 
   // ---- 键盘快捷键 ----
   // 编辑器面板打开时禁用会与 Monaco 冲突的快捷键
@@ -1497,6 +1530,7 @@ export default function WorkflowEditorPage() {
                 onEdgesChange={viewMode === "running" ? undefined : onCanvasEdgesChange}
                 onConnect={viewMode === "running" ? undefined : onConnect}
                 onNodeClick={onNodeClick}
+                onNodeDragStop={viewMode === "running" ? undefined : onNodeDragStop}
                 onNodeContextMenu={viewMode === "running" ? undefined : onNodeContextMenu}
                 onPaneClick={onPaneClick}
                 onDragOver={viewMode === "running" ? undefined : onDragOver}
@@ -1708,7 +1742,7 @@ export default function WorkflowEditorPage() {
               <DrawerTitle>添加节点</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto px-4 pb-4">
-              <MobileNodePanel />
+              <MobileNodePanel onPluginClick={handleMobilePluginClick} />
             </div>
             <div className="px-4 pb-4 pt-2 border-t border-border">
               <Button

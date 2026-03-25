@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, type DragEvent } from "react";
+import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import {
   PLUGIN_CATALOG,
@@ -49,7 +49,11 @@ function fuzzyMatch(query: string, text: string): boolean {
   return qi === q.length;
 }
 
-export function MobileNodePanel() {
+interface MobileNodePanelProps {
+  onPluginClick?: (plugin: PluginEntry) => void;
+}
+
+export function MobileNodePanel({ onPluginClick }: MobileNodePanelProps) {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<FilterTag>("all");
 
@@ -78,14 +82,6 @@ export function MobileNodePanel() {
       ),
     [filteredPlugins],
   );
-
-  const onDragStart = useCallback((event: DragEvent, plugin: PluginEntry) => {
-    event.dataTransfer.setData(
-      "application/reactflow",
-      JSON.stringify({ type: plugin.type, name: plugin.name, defaultSpec: plugin.defaultSpec }),
-    );
-    event.dataTransfer.effectAllowed = "move";
-  }, []);
 
   return (
     <div className="flex flex-col gap-3">
@@ -142,9 +138,8 @@ export function MobileNodePanel() {
             {plugins.map((plugin) => (
               <div
                 key={plugin.type}
-                draggable
-                onDragStart={(e) => onDragStart(e, plugin)}
-                className="mb-1 px-3 py-2.5 rounded-lg border border-border/50 hover:bg-muted/50 active:bg-muted cursor-grab active:cursor-grabbing transition-colors"
+                onClick={() => onPluginClick?.(plugin)}
+                className="mb-1 px-3 py-2.5 rounded-lg border border-border/50 hover:bg-muted/50 active:bg-muted cursor-pointer transition-colors"
               >
                 <div className="text-sm font-medium">{plugin.name}</div>
                 <div className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate">
