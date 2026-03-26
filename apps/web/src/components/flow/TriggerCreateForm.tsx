@@ -74,7 +74,7 @@ export function TriggerCreateForm({
   const type = watch("type");
   const webhookSecret = watch("webhookSecret");
 
-  const createTrigger = trpc.workflow.triggerCreate.useMutation({
+  const createTrigger = trpc.workflowTrigger.create.useMutation({
     onSuccess: () => {
       toast.success("触发器创建成功");
       onCreated();

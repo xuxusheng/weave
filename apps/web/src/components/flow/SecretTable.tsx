@@ -29,7 +29,7 @@ interface SecretTableProps {
 
 function RevealCell({ id }: { id: string }) {
   const [revealed, setRevealed] = useState(false);
-  const { data } = trpc.workflow.secretReveal.useQuery({ id }, { enabled: revealed });
+  const { data } = trpc.workflowSecret.reveal.useQuery({ id }, { enabled: revealed });
 
   return (
     <button
@@ -62,12 +62,12 @@ export function SecretTable({ namespaceId }: SecretTableProps) {
     key: string;
   } | null>(null);
 
-  const { data, refetch } = trpc.workflow.secretList.useQuery(
+  const { data, refetch } = trpc.workflowSecret.list.useQuery(
     { namespaceId },
     { enabled: !!namespaceId },
   );
 
-  const deleteMutation = trpc.workflow.secretDelete.useMutation({
+  const deleteMutation = trpc.workflowSecret.delete.useMutation({
     onSuccess: () => {
       toast.success("密钥已删除");
       void refetch();

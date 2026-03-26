@@ -19,17 +19,15 @@ export default defineConfig({
     compression({ algorithms: ["brotliCompress"], exclude: [/\.(png|jpe?g|gif|woff2?|ttf)$/i] }),
   ],
   resolve: {
-    alias: {
-      "@": "/src",
-    },
+    tsconfigPaths: true,
   },
   server: {
     fs: {
-      allow: [".."],
+      allow: ["..", "../.."],
     },
     proxy: {
       "/api": {
-        target: "http://localhost:3001",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

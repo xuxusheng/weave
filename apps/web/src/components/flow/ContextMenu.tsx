@@ -71,8 +71,6 @@ export function ContextMenu({
         </button>
       )}
 
-      <div className="h-px bg-border my-1" />
-
       {(onAddErrors || onAddFinally) && <div className="h-px bg-border my-1" />}
 
       {onAddErrors && (

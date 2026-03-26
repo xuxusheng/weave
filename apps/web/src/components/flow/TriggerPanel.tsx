@@ -138,17 +138,17 @@ function StateBadge({ state }: { state: string }) {
 }
 
 export function TriggerPanel({ workflowId, onCreate }: TriggerPanelProps) {
-  const { data, isLoading, refetch } = trpc.workflow.triggerList.useQuery(
+  const { data, isLoading, refetch } = trpc.workflowTrigger.list.useQuery(
     { workflowId },
     { enabled: !!workflowId },
   );
 
-  const { data: statusData } = trpc.workflow.triggerStatus.useQuery(
+  const { data: statusData } = trpc.workflowTrigger.status.useQuery(
     { workflowId },
     { enabled: !!workflowId, refetchInterval: 30_000 },
   );
 
-  const toggleMutation = trpc.workflow.triggerToggle.useMutation({
+  const toggleMutation = trpc.workflowTrigger.toggle.useMutation({
     onSuccess: () => {
       void refetch();
       toast.success("已更新触发器状态");
@@ -156,7 +156,7 @@ export function TriggerPanel({ workflowId, onCreate }: TriggerPanelProps) {
     onError: () => toast.error("操作失败"),
   });
 
-  const deleteMutation = trpc.workflow.triggerDelete.useMutation({
+  const deleteMutation = trpc.workflowTrigger.delete.useMutation({
     onSuccess: () => {
       void refetch();
       toast.success("已删除触发器");

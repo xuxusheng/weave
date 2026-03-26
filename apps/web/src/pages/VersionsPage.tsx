@@ -52,17 +52,17 @@ export function VersionsPage() {
   const { workflowId } = useParams({ from: "/sidebar-layout/workflows/$workflowId/versions" });
   const [activeTab, setActiveTab] = useState<VersionTab>("drafts");
 
-  const draftsQuery = trpc.workflow.draftList.useQuery({ workflowId }, { enabled: !!workflowId });
-  const releasesQuery = trpc.workflow.releaseList.useQuery(
+  const draftsQuery = trpc.workflowDraft.list.useQuery({ workflowId }, { enabled: !!workflowId });
+  const releasesQuery = trpc.workflowRelease.list.useQuery(
     { workflowId },
     { enabled: !!workflowId },
   );
 
-  const draftRollback = trpc.workflow.draftRollback.useMutation({
+  const draftRollback = trpc.workflowDraft.rollback.useMutation({
     onSuccess: () => toast.success("已恢复到所选草稿"),
     onError: () => toast.error("回滚失败"),
   });
-  const releaseRollback = trpc.workflow.releaseRollback.useMutation({
+  const releaseRollback = trpc.workflowRelease.rollback.useMutation({
     onSuccess: () => toast.success("已恢复到所选版本"),
     onError: () => toast.error("回滚失败"),
   });

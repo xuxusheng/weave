@@ -14,12 +14,12 @@ export function useKestraHealthCheck() {
   useEffect(() => {
     let isMounted = true;
     const check = () => {
-      utils.workflow.kestraHealth
+      utils.workflowExecution.kestraHealth
         .fetch()
-        .then((res) => {
+        .then((res: { healthy: boolean; error?: string }) => {
           if (isMounted) setKestraHealthy(res.healthy, res.error);
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           if (isMounted)
             setKestraHealthy(false, err instanceof Error ? err.message : "健康检查失败");
         })
@@ -45,7 +45,7 @@ export function useExecutionPoll() {
   const currentExecutionRef = useRef(currentExecution);
   currentExecutionRef.current = currentExecution;
 
-  const { data, isSuccess } = trpc.workflow.executionGet.useQuery(
+  const { data, isSuccess } = trpc.workflowExecution.get.useQuery(
     { executionId: currentExecution?.id ?? "" },
     {
       enabled: !!currentExecution && isExecuting && !isTerminalState(currentExecution.state),

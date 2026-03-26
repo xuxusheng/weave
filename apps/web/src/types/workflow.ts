@@ -202,10 +202,10 @@ export const EDGE_STYLES: Record<
   { stroke: string; strokeWidth: number; strokeDasharray?: string }
 > = {
   sequence: { stroke: "#6366f1", strokeWidth: 2 },
-  containment: { stroke: "#9ca3af", strokeWidth: 2, strokeDasharray: "5,5" },
+  containment: { stroke: "#9ca3af", strokeWidth: 2, strokeDasharray: "6,4" },
   then: { stroke: "#22c55e", strokeWidth: 2 },
   else: { stroke: "#ef4444", strokeWidth: 2 },
   case: { stroke: "#3b82f6", strokeWidth: 2 },
-  errors: { stroke: "#ef4444", strokeWidth: 2, strokeDasharray: "5,5" },
-  finally: { stroke: "#9ca3af", strokeWidth: 2, strokeDasharray: "5,5" },
+  errors: { stroke: "#ef4444", strokeWidth: 2, strokeDasharray: "6,4" },
+  finally: { stroke: "#8b5cf6", strokeWidth: 2, strokeDasharray: "3,3" },
 };

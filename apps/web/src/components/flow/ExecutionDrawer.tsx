@@ -68,7 +68,7 @@ export function ExecutionDrawer({ onClose, onReplay }: ExecutionDrawerProps) {
   const [tab, setTab] = useState<Tab>("overview");
   const currentExecution = useWorkflowStore((s) => s.currentExecution);
   const isExecuting = useWorkflowStore((s) => s.isExecuting);
-  const executionKill = trpc.workflow.executionKill.useMutation({
+  const executionKill = trpc.workflowExecution.kill.useMutation({
     onSuccess: () => toast.success("已发送停止信号"),
     onError: (err) => toast.error(`停止失败: ${err.message}`),
   });
@@ -271,7 +271,7 @@ function TasksTab({
 
 function LogsTab({ kestraExecId }: { kestraExecId: string }) {
   const [level, setLevel] = useState<"TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "">("");
-  const logsQuery = trpc.workflow.executionLogs.useQuery(
+  const logsQuery = trpc.workflowExecution.logs.useQuery(
     { kestraExecId, minLevel: level || undefined },
     { enabled: !!kestraExecId, refetchInterval: 5000 },
   );

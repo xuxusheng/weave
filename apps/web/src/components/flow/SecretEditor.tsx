@@ -29,7 +29,7 @@ export function SecretEditor({ namespaceId, editing, onClose, onSaved }: SecretE
   const [showValue, setShowValue] = useState(false);
   const [keyError, setKeyError] = useState("");
 
-  const createMutation = trpc.workflow.secretCreate.useMutation({
+  const createMutation = trpc.workflowSecret.create.useMutation({
     onSuccess: () => {
       toast.success("密钥已创建");
       onSaved();
@@ -37,7 +37,7 @@ export function SecretEditor({ namespaceId, editing, onClose, onSaved }: SecretE
     onError: (err) => toast.error(err.message),
   });
 
-  const updateMutation = trpc.workflow.secretUpdate.useMutation({
+  const updateMutation = trpc.workflowSecret.update.useMutation({
     onSuccess: () => {
       toast.success("密钥已更新");
       onSaved();

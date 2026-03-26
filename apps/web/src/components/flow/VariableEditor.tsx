@@ -33,7 +33,7 @@ export function VariableEditor({ namespaceId, editing, onClose, onSaved }: Varia
   const [description, setDescription] = useState(editing?.description ?? "");
   const [keyError, setKeyError] = useState("");
 
-  const createVar = trpc.workflow.variableCreate.useMutation({
+  const createVar = trpc.workflowVariable.create.useMutation({
     onSuccess: () => {
       toast.success("变量创建成功");
       onSaved();
@@ -44,7 +44,7 @@ export function VariableEditor({ namespaceId, editing, onClose, onSaved }: Varia
     },
   });
 
-  const updateVar = trpc.workflow.variableUpdate.useMutation({
+  const updateVar = trpc.workflowVariable.update.useMutation({
     onSuccess: () => {
       toast.success("变量更新成功");
       onSaved();

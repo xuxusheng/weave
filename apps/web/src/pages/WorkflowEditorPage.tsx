@@ -854,7 +854,7 @@ export default function WorkflowEditorPage() {
   // ---- Draft / Release (tRPC) ----
   const [showPublishDialog, setShowPublishDialog] = useState(false);
 
-  const draftSave = trpc.workflow.draftSave.useMutation({
+  const draftSave = trpc.workflowDraft.save.useMutation({
     onSuccess: (_data, variables) => {
       markSaved();
       if (variables.message !== "自动暂存") {
@@ -862,7 +862,7 @@ export default function WorkflowEditorPage() {
       }
       // Refresh draft list
       if (savedWorkflowId) {
-        void utils.workflow.draftList.invalidate({ workflowId: savedWorkflowId });
+        void utils.workflowDraft.list.invalidate({ workflowId: savedWorkflowId });
       }
     },
     onError: (err, variables) => {
@@ -874,13 +874,13 @@ export default function WorkflowEditorPage() {
     },
   });
 
-  const draftRollback = trpc.workflow.draftRollback.useMutation({
+  const draftRollback = trpc.workflowDraft.rollback.useMutation({
     onError: (err) => {
       toast.error(`回滚失败: ${err.message}`);
     },
   });
 
-  const releasePublish = trpc.workflow.releasePublish.useMutation({
+  const releasePublish = trpc.workflowRelease.publish.useMutation({
     onSuccess: (result) => {
       setPublishedVersion(result.version);
       toast.success(`版本 v${result.version} 已发布`);
@@ -889,7 +889,7 @@ export default function WorkflowEditorPage() {
       }
       setShowPublishDialog(false);
       if (savedWorkflowId) {
-        void utils.workflow.releaseList.invalidate({ workflowId: savedWorkflowId });
+        void utils.workflowRelease.list.invalidate({ workflowId: savedWorkflowId });
       }
     },
     onError: (err) => {
@@ -897,22 +897,22 @@ export default function WorkflowEditorPage() {
     },
   });
 
-  const releaseRollback = trpc.workflow.releaseRollback.useMutation({
+  const releaseRollback = trpc.workflowRelease.rollback.useMutation({
     onError: (err) => {
       toast.error(`版本回滚失败: ${err.message}`);
     },
   });
 
   // Draft/Release list queries (enabled when savedWorkflowId exists)
-  const draftsQuery = trpc.workflow.draftList.useQuery(
+  const draftsQuery = trpc.workflowDraft.list.useQuery(
     { workflowId: savedWorkflowId! },
     { enabled: !!savedWorkflowId },
   );
-  const releasesQuery = trpc.workflow.releaseList.useQuery(
+  const releasesQuery = trpc.workflowRelease.list.useQuery(
     { workflowId: savedWorkflowId! },
     { enabled: !!savedWorkflowId },
   );
-  const { data: triggersData } = trpc.workflow.triggerList.useQuery(
+  const { data: triggersData } = trpc.workflowTrigger.list.useQuery(
     { workflowId: savedWorkflowId! },
     { enabled: !!savedWorkflowId },
   );
@@ -1071,12 +1071,12 @@ export default function WorkflowEditorPage() {
     let isMounted = true;
     const utilsRef = utils;
     const check = () => {
-      utilsRef.workflow.kestraHealth
+      utilsRef.workflowExecution.kestraHealth
         .fetch()
-        .then((res) => {
+        .then((res: { healthy: boolean; error?: string }) => {
           if (isMounted) setKestraHealthy(res.healthy, res.error);
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           if (isMounted)
             setKestraHealthy(false, err instanceof Error ? err.message : "健康检查失败");
         })
@@ -1114,11 +1114,12 @@ export default function WorkflowEditorPage() {
     function tick() {
       const exec = currentExecutionRef.current;
       if (!exec || !isMounted) return;
-      utilsRef.current.workflow.executionGet
+      utilsRef.current.workflowExecution.get
         .fetch({
           executionId: exec.id,
         })
-        .then((result) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((result: any) => {
           if (!isMounted || !result) return;
           setCurrentExecutionRef.current(toExecutionSummary(result));
           if (isTerminalState(result.state)) {
@@ -1151,7 +1152,7 @@ export default function WorkflowEditorPage() {
     };
   }, [currentExecution?.id, currentExecution?.state, isExecuting]);
 
-  const executeTest = trpc.workflow.executeTest.useMutation({
+  const executeTest = trpc.workflowExecution.executeTest.useMutation({
     onSuccess: (result) => {
       setIsExecuting(true);
       setCurrentExecution(toExecutionSummary(result));
@@ -1168,7 +1169,7 @@ export default function WorkflowEditorPage() {
     onError: (err) => toast.error(`执行失败: ${err.message}`),
   });
 
-  const executionReplay = trpc.workflow.executionReplay.useMutation({
+  const executionReplay = trpc.workflowExecution.replay.useMutation({
     onSuccess: (result) => {
       setIsExecuting(true);
       setCurrentExecution(toExecutionSummary(result));
@@ -1826,7 +1827,7 @@ export default function WorkflowEditorPage() {
           onClose={() => setShowTriggerForm(false)}
           onCreated={() => {
             setShowTriggerForm(false);
-            void utils.workflow.triggerList.invalidate({ workflowId: savedWorkflowId });
+            void utils.workflowTrigger.list.invalidate({ workflowId: savedWorkflowId });
           }}
         />
       )}

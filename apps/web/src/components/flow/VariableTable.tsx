@@ -36,12 +36,12 @@ export function VariableTable({ namespaceId }: VariableTableProps) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const { data: variables, refetch } = trpc.workflow.variableList.useQuery(
+  const { data: variables, refetch } = trpc.workflowVariable.list.useQuery(
     { namespaceId },
     { enabled: !!namespaceId },
   );
 
-  const deleteVar = trpc.workflow.variableDelete.useMutation({
+  const deleteVar = trpc.workflowVariable.delete.useMutation({
     onSuccess: () => {
       toast.success("变量已删除");
       void refetch();

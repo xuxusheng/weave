@@ -68,13 +68,13 @@ export function ProductionExecHistory({ workflowId, onClose }: ProductionExecHis
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | undefined>();
 
-  const listQuery = trpc.workflow.productionExecList.useQuery(
+  const listQuery = trpc.workflowExecution.productionList.useQuery(
     { workflowId, limit: 20, cursor },
     { enabled: !!workflowId, refetchInterval: 10000 },
   );
 
   const selectedExecId = expandedId;
-  const detailQuery = trpc.workflow.productionExecGet.useQuery(
+  const detailQuery = trpc.workflowExecution.productionGet.useQuery(
     { executionId: selectedExecId! },
     { enabled: !!selectedExecId },
   );

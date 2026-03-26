@@ -9,14 +9,14 @@ const elkOptions = {
   "elk.spacing.nodeNode": "80",
 };
 
+const DEFAULT_NODE_WIDTH = 200;
+const DEFAULT_NODE_HEIGHT = 60;
+
 export async function getLayoutedElements(
   nodes: Node[],
   edges: Edge[],
   direction: "TB" | "LR" = "TB",
 ) {
-  const nodeWidth = 200;
-  const nodeHeight = 60;
-
   const graph = {
     id: "root",
     layoutOptions: {
@@ -25,8 +25,8 @@ export async function getLayoutedElements(
     },
     children: nodes.map((node) => ({
       id: node.id,
-      width: nodeWidth,
-      height: nodeHeight,
+      width: node.measured?.width ?? DEFAULT_NODE_WIDTH,
+      height: node.measured?.height ?? DEFAULT_NODE_HEIGHT,
     })),
     edges: edges.map((edge) => ({
       id: edge.id,
@@ -39,11 +39,13 @@ export async function getLayoutedElements(
 
   const layoutedNodes = nodes.map((node) => {
     const layoutedNode = layoutedGraph.children?.find((n) => n.id === node.id);
+    const w = node.measured?.width ?? DEFAULT_NODE_WIDTH;
+    const h = node.measured?.height ?? DEFAULT_NODE_HEIGHT;
     return {
       ...node,
       position: {
-        x: (layoutedNode?.x ?? 0) - nodeWidth / 2,
-        y: (layoutedNode?.y ?? 0) - nodeHeight / 2,
+        x: (layoutedNode?.x ?? 0) - w / 2,
+        y: (layoutedNode?.y ?? 0) - h / 2,
       },
     };
   });

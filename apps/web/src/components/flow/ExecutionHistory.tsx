@@ -101,7 +101,7 @@ interface ExecutionHistoryProps {
 
 export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHistoryProps) {
   const utils = trpc.useUtils();
-  const query = trpc.workflow.executionList.useQuery(
+  const query = trpc.workflowExecution.list.useQuery(
     { workflowId, limit: 30 },
     { enabled: !!workflowId, refetchInterval: 10000 },
   );
@@ -389,7 +389,7 @@ export function ExecutionHistory({ workflowId, onSelect, onClose }: ExecutionHis
                   <button
                     onClick={async () => {
                       try {
-                        const full = await utils.workflow.executionGet.fetch({
+                        const full = await utils.workflowExecution.get.fetch({
                           executionId: item.data.id,
                         });
                         if (full && onSelect) {
