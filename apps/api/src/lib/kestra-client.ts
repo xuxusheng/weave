@@ -13,6 +13,7 @@ import type {
   KestraFlow,
   KestraLogPage,
 } from "./kestra-types.js"
+import { propagation, context, withSpan } from "./tracing.js"
 
 // ========== Error ==========
 
@@ -58,50 +59,76 @@ export class KestraClient {
   }
 
   async request<T>(method: string, path: string, body?: unknown, contentType = "application/json"): Promise<T> {
-    const url = `${this.config.url}${path}`
+    return withSpan(
+      `Kestra ${method} ${path}`,
+      {
+        "http.request.method": method,
+        "url.full": `${this.config.url}${path}`,
+        "server.address": new URL(this.config.url).hostname,
+      },
+      async () => {
+        const url = `${this.config.url}${path}`
 
-    const headers: Record<string, string> = {
-      Authorization: this.authHeader(),
-    }
-    if (contentType) headers["Content-Type"] = contentType
+        const headers: Record<string, string> = {
+          Authorization: this.authHeader(),
+        }
+        if (contentType) headers["Content-Type"] = contentType
 
-    const res = await fetch(url, {
-      method,
-      headers,
-      body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
-    })
+        propagation.inject(context.active(), headers)
 
-    if (!res.ok) {
-      const text = await res.text()
-      throw new KestraError(res.status, text)
-    }
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
+        })
 
-    if (res.status === 204) return undefined as T
-    return res.json() as Promise<T>
+        if (!res.ok) {
+          const text = await res.text()
+          throw new KestraError(res.status, text)
+        }
+
+        if (res.status === 204) return undefined as T
+        return res.json() as Promise<T>
+      },
+    )
   }
 
   async requestForm<T>(method: string, path: string, fields: Record<string, string>): Promise<T> {
-    const url = `${this.config.url}${path}`
-    const form = new FormData()
-    for (const [k, v] of Object.entries(fields)) {
-      form.append(k, v)
-    }
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        Authorization: this.authHeader(),
+    return withSpan(
+      `Kestra ${method} ${path}`,
+      {
+        "http.request.method": method,
+        "url.full": `${this.config.url}${path}`,
+        "server.address": new URL(this.config.url).hostname,
       },
-      body: form,
-    })
+      async () => {
+        const url = `${this.config.url}${path}`
+        const form = new FormData()
+        for (const [k, v] of Object.entries(fields)) {
+          form.append(k, v)
+        }
 
-    if (!res.ok) {
-      const text = await res.text()
-      throw new KestraError(res.status, text)
-    }
+        const headers: Record<string, string> = {
+          Authorization: this.authHeader(),
+        }
 
-    if (res.status === 204) return undefined as T
-    return res.json() as Promise<T>
+        propagation.inject(context.active(), headers)
+
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: form,
+        })
+
+        if (!res.ok) {
+          const text = await res.text()
+          throw new KestraError(res.status, text)
+        }
+
+        if (res.status === 204) return undefined as T
+        return res.json() as Promise<T>
+      },
+    )
   }
 
   // ─── Health ───
