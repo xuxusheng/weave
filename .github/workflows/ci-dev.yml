@@ -10,8 +10,27 @@ env:
   IMAGE_NAME: ${{ vars.DOCKER_IMAGE || 'registry.cn-hongkong.aliyuncs.com/xusheng/weave' }}
 
 jobs:
+  migrate:
+    name: 数据库迁移 (Dev)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Migrations
+        run: bunx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
+
   build-and-deploy:
     name: 构建并推送镜像
+    needs: migrate
     runs-on: ubuntu-latest
 
     steps:

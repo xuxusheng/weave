@@ -34,7 +34,5 @@ ENV NODE_ENV=production
 ENV STATIC_ROOT=/web/dist/
 EXPOSE 3000
 
-# Install prisma CLI as bun user for migrations at runtime
-RUN bun install -g prisma
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["bun", "run", "index.js"]
