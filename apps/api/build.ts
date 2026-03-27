@@ -4,6 +4,7 @@ const result = await Bun.build({
   entrypoints: ["src/index.ts"],
   outdir: "dist",
   target: "bun",
+  packages: "bundle",
   plugins: [bunPluginPino()],
 })
 
