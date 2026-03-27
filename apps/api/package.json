@@ -10,6 +10,7 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
+    "@kestra-io/kestra-sdk": "^1.0.12",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/auto-instrumentations-node": "^0.72.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.214.0",

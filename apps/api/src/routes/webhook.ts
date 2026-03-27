@@ -4,6 +4,7 @@ import type { Prisma } from "../generated/prisma/client.js"
 import { prisma } from "../db.js"
 import { logger } from "../lib/logger.js"
 import { webhookRateLimiter } from "../middleware/rate-limit.js"
+import { kestra } from "../lib/kestra-client.js"
 
 export const webhookRoute = new Hono()
 
@@ -43,15 +44,13 @@ webhookRoute.post("/:workflowId/:triggerName", async (c) => {
   let state: string
   let startDate: string | undefined
   try {
-    const { getKestraClient } = await import("../lib/kestra-client.js")
-    const client = getKestraClient()
-    const execution = await client.triggerExecution(
+    const execution = await kestra().executions.trigger(
       trigger.workflow.namespace.kestraNamespace,
       trigger.kestraFlowId,
     )
     executionId = execution.id
     state = execution.state.current
-    startDate = execution.state.startDate
+    startDate = execution.state.startDate?.toISOString()
   } catch (e) {
     logger.error({ err: e, workflowId, triggerName }, "Webhook Kestra trigger failed")
     return c.json({ error: "Failed to trigger execution" }, 502)

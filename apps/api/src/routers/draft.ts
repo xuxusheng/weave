@@ -9,6 +9,7 @@ import {
   workflowInputSchema,
   workflowVariableSchema,
 } from "../schemas/index.js"
+import { kestra } from "../lib/kestra-client.js"
 
 export const workflowDraftRouter = t.router({
   save: t.procedure
@@ -58,24 +59,20 @@ export const workflowDraftRouter = t.router({
 
       // 异步推 Kestra（失败不阻塞 Draft 保存）
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
-        if (client.isHealthy()) {
-          const namespace = await prisma.namespace.findUnique({
-            where: { id: wf.namespaceId },
-          })
-          if (namespace) {
-            const { toKestraYaml } = await import("../lib/yaml-generator.js")
-            const yaml = toKestraYaml(
-              wfResult.nodes as Prisma.InputJsonValue,
-              wfResult.edges as Prisma.InputJsonValue,
-              wfResult.inputs as Prisma.InputJsonValue,
-              wfResult.variables as Prisma.InputJsonValue,
-              wf.flowId,
-              namespace.kestraNamespace,
-            )
-            await client.upsertFlow(namespace.kestraNamespace, `${wf.flowId}_test`, yaml)
-          }
+        const namespace = await prisma.namespace.findUnique({
+          where: { id: wf.namespaceId },
+        })
+        if (namespace) {
+          const { toKestraYaml } = await import("../lib/yaml-generator.js")
+          const yaml = toKestraYaml(
+            wfResult.nodes as Prisma.InputJsonValue,
+            wfResult.edges as Prisma.InputJsonValue,
+            wfResult.inputs as Prisma.InputJsonValue,
+            wfResult.variables as Prisma.InputJsonValue,
+            wf.flowId,
+            namespace.kestraNamespace,
+          )
+          await kestra().flows.create(yaml)
         }
       } catch { /* Kestra 不可达，Draft 仍保存成功 */ }
 

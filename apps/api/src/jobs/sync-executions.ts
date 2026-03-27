@@ -1,6 +1,7 @@
 import { Prisma } from "../generated/prisma/client.js"
 import { prisma } from "../db.js"
 import { logger } from "../lib/logger.js"
+import { kestra } from "../lib/kestra-client.js"
 
 const SYNC_INTERVAL = 10 * 60 * 1000
 
@@ -9,8 +10,7 @@ async function syncRunningExecutions() {
   if (!kestraUrl) return
 
   try {
-    const { getKestraClient } = await import("../lib/kestra-client.js")
-    const client = getKestraClient()
+    const k = kestra()
 
     const running = await prisma.workflowDraftExecution.findMany({
       where: { state: { notIn: ["SUCCESS", "WARNING", "FAILED", "KILLED", "CANCELLED", "RETRIED"] } },
@@ -21,7 +21,7 @@ async function syncRunningExecutions() {
 
       const results = await Promise.allSettled(
         running.map(async (exec) => {
-          const kestraExec = await client.getExecution(exec.kestraExecId)
+          const kestraExec = await k.executions.get(exec.kestraExecId)
           if (kestraExec.state.current !== exec.state) {
             await prisma.workflowDraftExecution.update({
               where: { id: exec.id },
@@ -56,7 +56,7 @@ async function syncRunningExecutions() {
 
       const prodResults = await Promise.allSettled(
         prodRunning.map(async (exec) => {
-          const kestraExec = await client.getExecution(exec.kestraExecId)
+          const kestraExec = await k.executions.get(exec.kestraExecId)
           if (kestraExec.state.current !== exec.state) {
             await prisma.workflowExecution.update({
               where: { id: exec.id },

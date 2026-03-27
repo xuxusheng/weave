@@ -7,6 +7,7 @@ import { logger } from "../lib/logger.js"
 import { triggerConfigSchema } from "../schemas/index.js"
 import { nameToSlug } from "@weave/shared/slug"
 import { buildTriggerFlowYaml } from "../lib/trigger-yaml.js"
+import { kestra } from "../lib/kestra-client.js"
 
 export const workflowTriggerRouter = t.router({
   create: t.procedure
@@ -66,9 +67,7 @@ export const workflowTriggerRouter = t.router({
       })
 
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
-        await client.upsertFlow(wf.namespace.kestraNamespace, kestraFlowId, yaml)
+        await kestra().flows.create(yaml)
       } catch {
         throw new TRPCError({
           code: "BAD_GATEWAY",
@@ -220,9 +219,7 @@ export const workflowTriggerRouter = t.router({
             triggerConfig: config,
           })
           try {
-            const { getKestraClient } = await import("../lib/kestra-client.js")
-            const client = getKestraClient()
-            await client.upsertFlow(trigger.workflow.namespace.kestraNamespace, trigger.kestraFlowId, yaml)
+            await kestra().flows.create(yaml)
           } catch (e) {
             logger.warn({ err: e }, "Kestra trigger sync failed (best-effort)")
           }
@@ -248,9 +245,7 @@ export const workflowTriggerRouter = t.router({
 
       // Best-effort Kestra cleanup
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
-        await client.deleteFlow(trigger.workflow.namespace.kestraNamespace, trigger.kestraFlowId)
+        await kestra().flows.delete(trigger.workflow.namespace.kestraNamespace, trigger.kestraFlowId)
       } catch (e) {
         logger.warn({ err: e }, "Kestra trigger delete failed (best-effort)")
       }
@@ -281,9 +276,7 @@ export const workflowTriggerRouter = t.router({
       if (input.disabled) {
         // Best-effort Kestra cleanup
         try {
-          const { getKestraClient } = await import("../lib/kestra-client.js")
-          const client = getKestraClient()
-          await client.deleteFlow(ns, trigger.kestraFlowId)
+          await kestra().flows.delete(ns, trigger.kestraFlowId)
         } catch (e) {
           logger.warn({ err: e }, "Kestra trigger disable failed (best-effort)")
         }
@@ -304,9 +297,7 @@ export const workflowTriggerRouter = t.router({
           triggerConfig: trigger.config as Record<string, unknown>,
         })
         try {
-          const { getKestraClient } = await import("../lib/kestra-client.js")
-          const client = getKestraClient()
-          await client.upsertFlow(ns, trigger.kestraFlowId, yaml)
+          await kestra().flows.create(yaml)
         } catch {
           throw new TRPCError({
             code: "BAD_GATEWAY",

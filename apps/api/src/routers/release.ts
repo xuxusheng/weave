@@ -5,6 +5,7 @@ import type { Prisma } from "../generated/prisma/client.js"
 import { t } from "../trpc.js"
 import { prisma } from "../db.js"
 import { logger } from "../lib/logger.js"
+import { kestra } from "../lib/kestra-client.js"
 
 export const workflowReleaseRouter = t.router({
   publish: t.procedure
@@ -78,9 +79,7 @@ export const workflowReleaseRouter = t.router({
       // 异步推 Kestra（失败不阻塞发布）
       let kestraStatus: "synced" | "failed" = "synced"
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
-        await client.upsertFlow(wf.namespace.kestraNamespace, wf.flowId, input.yaml)
+        await kestra().flows.create(input.yaml)
       } catch (e) {
         logger.warn({ err: e, workflowId: input.workflowId }, "Kestra push failed on release publish")
         kestraStatus = "failed"
@@ -163,9 +162,7 @@ export const workflowReleaseRouter = t.router({
 
       // 异步推 Kestra（失败不阻塞）
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
-        await client.upsertFlow(wf.namespace.kestraNamespace, wf.flowId, release.yaml)
+        await kestra().flows.create(release.yaml)
       } catch {
         // Kestra 不可达，本地回滚仍成功
       }

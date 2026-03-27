@@ -4,6 +4,7 @@ import { Prisma } from "../generated/prisma/client.js"
 import { t } from "../trpc.js"
 import { prisma } from "../db.js"
 import { logger } from "../lib/logger.js"
+import { kestra } from "../lib/kestra-client.js"
 
 export const workflowVariableRouter = t.router({
   list: t.procedure
@@ -50,15 +51,11 @@ export const workflowVariableRouter = t.router({
 
       // Best-effort sync to Kestra namespace variables
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
         const ns = await prisma.namespace.findUnique({ where: { id: input.namespaceId } })
         if (ns) {
-          const allVars = await prisma.variable.findMany({
-            where: { namespaceId: input.namespaceId },
-          })
+          const allVars = await prisma.variable.findMany({ where: { namespaceId: input.namespaceId } })
           const vars = Object.fromEntries(allVars.map((v) => [v.key, v.value]))
-          await client.request("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
+          await kestra().raw("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
         }
       } catch (e) {
         logger.warn({ err: e }, "Kestra variable sync failed (best-effort)")
@@ -87,13 +84,11 @@ export const workflowVariableRouter = t.router({
 
       // Best-effort sync
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
         const ns = await prisma.namespace.findUnique({ where: { id: variable.namespaceId } })
         if (ns) {
           const allVars = await prisma.variable.findMany({ where: { namespaceId: variable.namespaceId } })
           const vars = Object.fromEntries(allVars.map((v) => [v.key, v.value]))
-          await client.request("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
+          await kestra().raw("POST", `/api/v1/variables/${ns.kestraNamespace}`, vars)
         }
       } catch (e) {
         logger.warn({ err: e }, "Kestra variable update sync failed (best-effort)")
@@ -112,11 +107,9 @@ export const workflowVariableRouter = t.router({
 
       // Best-effort sync — delete specific key from Kestra
       try {
-        const { getKestraClient } = await import("../lib/kestra-client.js")
-        const client = getKestraClient()
         const ns = await prisma.namespace.findUnique({ where: { id: variable.namespaceId } })
         if (ns) {
-          await client.request("DELETE", `/api/v1/variables/${ns.kestraNamespace}/${variable.key}`)
+          await kestra().raw("DELETE", `/api/v1/variables/${ns.kestraNamespace}/${variable.key}`)
         }
       } catch (e) {
         logger.warn({ err: e }, "Kestra variable delete sync failed (best-effort)")

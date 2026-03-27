@@ -3,14 +3,16 @@ import { z } from "zod"
 import type { Prisma } from "../generated/prisma/client.js"
 import { t } from "../trpc.js"
 import { prisma } from "../db.js"
+import { kestra, isTerminalState, KestraError } from "../lib/kestra-client.js"
+
+let _kestraHealthy = false
 
 export const workflowExecutionRouter = t.router({
   kestraHealth: t.procedure.query(async () => {
     try {
-      const { getKestraClient } = await import("../lib/kestra-client.js")
-      const client = getKestraClient()
-      const result = await client.healthCheckDetailed()
-      client.healthy = result.healthy
+      const k = kestra()
+      const result = await k.health.detailed()
+      _kestraHealthy = result.healthy
       return { healthy: result.healthy, error: result.error, timestamp: new Date().toISOString() }
     } catch (err) {
       return { healthy: false, error: err instanceof Error ? err.message : "Kestra 客户端未初始化", timestamp: new Date().toISOString() }
@@ -25,10 +27,6 @@ export const workflowExecutionRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const { getKestraClient, KestraError } = await import(
-        "../lib/kestra-client.js"
-      )
-
       const wf = await prisma.workflow.findUnique({
         where: { id: input.workflowId },
         include: { namespace: true },
@@ -37,12 +35,12 @@ export const workflowExecutionRouter = t.router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Workflow not found" })
       }
 
-      const client = getKestraClient()
-      if (!client.isHealthy()) {
+      const k = kestra()
+      if (!_kestraHealthy) {
         try {
-          await client.refreshHealth()
+          _kestraHealthy = await k.health.check()
         } catch { /* ignore */ }
-        if (!client.isHealthy()) {
+        if (!_kestraHealthy) {
           throw new TRPCError({
             code: "SERVICE_UNAVAILABLE",
             message: "Kestra 不可达，请检查连接",
@@ -52,7 +50,7 @@ export const workflowExecutionRouter = t.router({
 
       const testFlowId = `${wf.flowId}_test`
       try {
-        const execution = await client.triggerExecution(
+        const execution = await k.executions.trigger(
           wf.namespace.kestraNamespace,
           testFlowId,
           input.inputValues,
@@ -89,9 +87,7 @@ export const workflowExecutionRouter = t.router({
   get: t.procedure
     .input(z.object({ executionId: z.string() }))
     .query(async ({ input }) => {
-      const { getKestraClient, isTerminalState } = await import(
-        "../lib/kestra-client.js"
-      )
+      const k = kestra()
 
       const draftExec = await prisma.workflowDraftExecution.findUnique({
         where: { id: input.executionId },
@@ -101,8 +97,7 @@ export const workflowExecutionRouter = t.router({
         const exec = draftExec
         if (!isTerminalState(exec.state)) {
           try {
-            const client = getKestraClient()
-            const kestraExec = await client.getExecution(exec.kestraExecId)
+            const kestraExec = await k.executions.get(exec.kestraExecId)
             return {
               source: "draft" as const,
               ...(await prisma.workflowDraftExecution.update({
@@ -148,8 +143,7 @@ export const workflowExecutionRouter = t.router({
       }
       if (!isTerminalState(exec.state)) {
         try {
-          const client = getKestraClient()
-          const kestraExec = await client.getExecution(exec.kestraExecId)
+          const kestraExec = await k.executions.get(exec.kestraExecId)
           const updated = await prisma.workflowExecution.update({
             where: { id: exec.id },
             data: {
@@ -246,8 +240,6 @@ export const workflowExecutionRouter = t.router({
   kill: t.procedure
     .input(z.object({ executionId: z.string() }))
     .mutation(async ({ input }) => {
-      const { getKestraClient } = await import("../lib/kestra-client.js")
-
       const exec = await prisma.workflowDraftExecution.findUnique({
         where: { id: input.executionId },
       })
@@ -256,8 +248,7 @@ export const workflowExecutionRouter = t.router({
       }
 
       try {
-        const client = getKestraClient()
-        await client.killExecution(exec.kestraExecId)
+        await kestra().executions.kill(exec.kestraExecId)
       } catch {
         throw new TRPCError({
           code: "BAD_GATEWAY",
@@ -276,10 +267,6 @@ export const workflowExecutionRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const { getKestraClient, KestraError } = await import(
-        "../lib/kestra-client.js"
-      )
-
       const exec = await prisma.workflowDraftExecution.findUnique({
         where: { id: input.executionId },
       })
@@ -288,11 +275,9 @@ export const workflowExecutionRouter = t.router({
       }
 
       try {
-        const client = getKestraClient()
-        const newExec = await client.replayExecution(
+        const newExec = await kestra().executions.replay(
           exec.kestraExecId,
           input.taskRunId,
-          true,
         )
 
         return prisma.workflowDraftExecution.create({
@@ -332,10 +317,6 @@ export const workflowExecutionRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const { getKestraClient, KestraError } = await import(
-        "../lib/kestra-client.js"
-      )
-
       const exec = await prisma.workflowExecution.findUnique({
         where: { id: input.executionId },
         include: { release: true },
@@ -345,11 +326,9 @@ export const workflowExecutionRouter = t.router({
       }
 
       try {
-        const client = getKestraClient()
-        const newExec = await client.replayExecution(
+        const newExec = await kestra().executions.replay(
           exec.kestraExecId,
           input.taskRunId,
-          true,
         )
 
         return prisma.workflowExecution.create({
@@ -389,13 +368,8 @@ export const workflowExecutionRouter = t.router({
       }),
     )
     .query(async ({ input }) => {
-      const { getKestraClient, KestraError } = await import(
-        "../lib/kestra-client.js"
-      )
-
       try {
-        const client = getKestraClient()
-        return client.getExecutionLogs(input.kestraExecId, {
+        return kestra().logs.get(input.kestraExecId, {
           taskRunId: input.taskRunId,
           minLevel: input.minLevel,
         })
@@ -411,9 +385,7 @@ export const workflowExecutionRouter = t.router({
     }),
 
   sync: t.procedure.mutation(async () => {
-    const { getKestraClient } = await import("../lib/kestra-client.js")
-
-    const client = getKestraClient()
+    const k = kestra()
 
     const running = await prisma.workflowDraftExecution.findMany({
       where: { state: { notIn: ["SUCCESS", "WARNING", "FAILED", "KILLED", "CANCELLED", "RETRIED"] } },
@@ -421,7 +393,7 @@ export const workflowExecutionRouter = t.router({
 
     const results = await Promise.allSettled(
       running.map(async (exec) => {
-        const kestraExec = await client.getExecution(exec.kestraExecId)
+        const kestraExec = await k.executions.get(exec.kestraExecId)
         await prisma.workflowDraftExecution.update({
           where: { id: exec.id },
           data: {
@@ -445,7 +417,7 @@ export const workflowExecutionRouter = t.router({
 
     const prodResults = await Promise.allSettled(
       prodRunning.map(async (exec) => {
-        const kestraExec = await client.getExecution(exec.kestraExecId)
+        const kestraExec = await k.executions.get(exec.kestraExecId)
         await prisma.workflowExecution.update({
           where: { id: exec.id },
           data: {
@@ -524,9 +496,7 @@ export const workflowExecutionRouter = t.router({
   productionGet: t.procedure
     .input(z.object({ executionId: z.string() }))
     .query(async ({ input }) => {
-      const { getKestraClient, isTerminalState } = await import(
-        "../lib/kestra-client.js"
-      )
+      const k = kestra()
 
       const prodExec = await prisma.workflowExecution.findUnique({
         where: { id: input.executionId },
@@ -553,8 +523,7 @@ export const workflowExecutionRouter = t.router({
 
       if (!isTerminalState(exec.state)) {
         try {
-          const client = getKestraClient()
-          const kestraExec = await client.getExecution(exec.kestraExecId)
+          const kestraExec = await k.executions.get(exec.kestraExecId)
           const updated = await prisma.workflowExecution.update({
             where: { id: exec.id },
             data: {
