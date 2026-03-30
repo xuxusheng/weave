@@ -22,7 +22,12 @@ export function getTraceIds(c: HonoContext): { traceId: string; spanId: string }
 }
 
 function normalizeRoutePath(path: string): string {
-  return path.replace(/\/[0-9a-f-]{36}/g, "/:id")
+  return path
+    // UUID with hyphens (e.g., 550e8400-e29b-41d4-a716-446655440000)
+    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "/:id")
+    // UUID without hyphens (e.g., 550e8400e29b41d4a716446655440000)
+    .replace(/\/[0-9a-f]{32}/gi, "/:id")
+    // Numeric IDs
     .replace(/\/\d+/g, "/:id")
 }
 

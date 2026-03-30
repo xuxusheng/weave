@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { initTracing } from "./lib/tracing.js"
+import { initTracing, shutdownTracing } from "./lib/tracing.js"
 initTracing()
 
 import { serveStatic } from "hono/bun"
@@ -99,13 +99,16 @@ function shutdown(signal: string) {
   logger.info({ signal }, "Shutting down")
   stopSyncExecutionsTimer()
   shutdownRateLimiter()
-  prisma.$disconnect()
+  Promise.all([
+    shutdownTracing(),
+    prisma.$disconnect(),
+  ])
     .then(() => {
       logger.info("Server closed")
       process.exit(0)
     })
     .catch((err) => {
-      logger.error({ err }, "Failed to disconnect prisma")
+      logger.error({ err }, "Failed to shutdown gracefully")
       process.exit(1)
     })
 }

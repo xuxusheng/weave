@@ -20,13 +20,29 @@ export const edgeTypeSchema = z.enum([
 ])
 
 export interface WorkflowNode {
-  id: string
-  type: string
-  name: string
-  description?: string
-  containerId: string | null
-  sortIndex: number
+  // --- Kestra 对齐字段 ---
+  // 与 Kestra YAML task 一一对应的字段，生成 YAML 时直接使用
+  id: string // Kestra task id，由 name slugify 生成
+  type: string // 插件类型，如 io.kestra.plugin.core.log.Log
+
+  // --- 平台展示字段 ---
+  // 仅用于前端画布展示，不参与 Kestra YAML 生成
+  name: string // 用户可读名称，同时作为 Kestra task id 的来源
+  description?: string // 节点描述，画布 tooltip 展示
+
+  // --- 画布布局字段 ---
+  // 控制节点在画布中的位置和层级关系，纯前端使用
+  containerId: string | null // 父容器节点 id（ForEach/Parallel 等），null 表示顶层
+  sortIndex: number // 同一容器内的排序权重，用于确定执行顺序
+
+  // --- 插件业务配置 ---
+  // 插件自身的配置字段，统一一层 spec
+  // 官方插件：转 YAML 时直接平铺（如 spec.message → YAML 的 message）
+  // 自定义插件：转 YAML 时包进 spec 块（如 spec.businessField → YAML 的 spec.businessField）
   spec: Record<string, unknown>
+
+  // --- 画布布局状态 ---
+  // 持久化到数据库，刷新后恢复布局
   ui?: {
     x: number
     y: number

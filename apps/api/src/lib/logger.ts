@@ -1,13 +1,21 @@
 import pino from "pino"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 export const logger = pino({
   level:
-    process.env.LOG_LEVEL ??
-    (process.env.NODE_ENV === "production" ? "info" : "debug"),
-  transport:
-    process.env.NODE_ENV !== "production"
-      ? { target: "pino-pretty", options: { colorize: true } }
-      : undefined,
+    process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
+  transport: isProduction
+    ? {
+        target: "pino-opentelemetry-transport",
+        options: {
+          logKeys: {
+            "traceId": "trace_id",
+            "spanId": "span_id",
+          },
+        },
+      }
+    : { target: "pino-pretty", options: { colorize: true } },
   redact: {
     paths: [
       "req.headers.authorization",
